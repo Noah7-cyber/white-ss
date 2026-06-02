@@ -33,6 +33,7 @@ import { invitationRoutes } from "../modules/invitation/routes/invitation.routes
 import { curriculumRoutes } from "../modules/curriculum";
 import { subjectRoutes } from "../modules/subject";
 import { analyticsRoutes } from "../modules/analytics";
+import { learningActivityRoutes } from "../modules/learning_activity";
 import invoiceRoutes from "../modules/invoice/routes/invoice.route";
 import { assessmentRoutes } from "../modules/assessment";
 import { milestoneRoutes } from "../modules/milestone";
@@ -97,6 +98,7 @@ router.use("/subjects", subjectRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/assessments", assessmentRoutes);
 router.use("/milestones", milestoneRoutes);
+router.use("/learning-activities", learningActivityRoutes);
 router.use("/global-search", searchRoutes);
 router.use("/invoices", invoiceRoutes);
 router.use("/portfolio", portfolioRoutes);
@@ -144,6 +146,7 @@ router.get("/", (_req, res) => {
       curriculums: "/api/v1/curriculums",
       subjects: "/api/v1/subjects",
       assessments: "/api/v1/assessments",
+      learningActivities: "/api/v1/learning-activities",
       milestones: "/api/v1/milestones",
       analytics: "/api/v1/analytics",
       invoiceNumbers: "/api/v1/invoice-numbers",

@@ -41,6 +41,7 @@ import { Curriculum } from "../../shared/entities/Curriculum";
 import { Assessment } from "../../shared/entities/Assessment";
 import { Milestone } from "../../shared/entities/Milestone";
 import { Enrolment } from "../../shared/entities/Enrolment";
+import { LearningActivity } from "../../shared/entities/LearningActivity";
 
 // Records & Activities
 import { Attendance } from "../../shared/entities/Attendance";
@@ -166,6 +167,7 @@ export const AppDataSource = new DataSource({
     Milestone,
     Subject,
     Curriculum,
+    LearningActivity,
     Portfolio,
     PortfolioSection,
     StaffClassesAndSubject,

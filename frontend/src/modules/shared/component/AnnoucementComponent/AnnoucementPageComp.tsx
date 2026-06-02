@@ -29,6 +29,34 @@ import { MobileFilterDrawer } from "../MobileFilterDrawer/MobileFilterDrawer";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { getRelativeTime } from "@/utils/helper";
 
+function parseMediaUrls(mediaUrl?: string | null): string[] {
+  if (!mediaUrl) return [];
+  if (Array.isArray(mediaUrl)) return mediaUrl;
+  return mediaUrl.split(",").filter(url => url.trim().length > 0);
+}
+
+function isVideoUrl(url: string) {
+  const lowercaseUrl = url.toLowerCase();
+  return lowercaseUrl.endsWith(".mp4") || lowercaseUrl.endsWith(".mov") || lowercaseUrl.endsWith(".webm");
+}
+
+const MediaDisplay = ({ mediaUrls, alt }: { mediaUrls: string[], alt: string }) => {
+  if (mediaUrls.length === 0) return null;
+  return (
+    <Box className="w-full flex gap-2 overflow-x-auto pb-2">
+      {mediaUrls.map((url, i) => (
+        <Box key={i} className="flex-shrink-0 h-56 md:h-72 w-80 overflow-hidden rounded-xl bg-gray-100">
+          {isVideoUrl(url) ? (
+            <video src={url} controls className="w-full h-full object-contain" />
+          ) : (
+            <img src={url} alt={alt} className="w-full h-full object-contain" />
+          )}
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
 export interface Announcement {
   id: number | string;
   title: string;
@@ -545,15 +573,7 @@ function AnnouncementsPageComponent({
               <>
                 {!isAnnouncementDetailLoading && activeAnnouncement && (
                   <>
-                    {activeAnnouncement?.mediaUrl && (
-                      <Box className="w-full h-56 md:h-72 overflow-hidden">
-                        <img
-                          src={activeAnnouncement.mediaUrl}
-                          alt={activeAnnouncement.subject}
-                          className="w-full h-full object-cover"
-                        />
-                      </Box>
-                    )}
+                    <MediaDisplay mediaUrls={parseMediaUrls(activeAnnouncement?.mediaUrl)} alt={activeAnnouncement?.subject || ""} />
 
                     <Box className="p-6 md:p-8 flex flex-col gap-4">
                       <Box className="space-y-2">
@@ -757,14 +777,18 @@ function AnnouncementsPageComponent({
                     <Box className="flex flex-col justify-between gap-3">
                       <Box className="flex justify-between">
                         <Box className="space-y-1 flex justify- gap-2">
-                          {announcement?.mediaUrl !== "" && (
-                            <img
-                              src={announcement?.mediaUrl}
-                              alt={announcement?.subject}
-                              width={40}
-                              height={40}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
+                          {parseMediaUrls(announcement?.mediaUrl).length > 0 && (
+                            <Box className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-100">
+                              {isVideoUrl(parseMediaUrls(announcement?.mediaUrl)[0]) ? (
+                                <video src={parseMediaUrls(announcement?.mediaUrl)[0]} className="w-full h-full object-cover" />
+                              ) : (
+                                <img
+                                  src={parseMediaUrls(announcement?.mediaUrl)[0]}
+                                  alt={announcement?.subject}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </Box>
                           )}
 
                           <Box className="flex flex-col">
@@ -821,15 +845,7 @@ function AnnouncementsPageComponent({
               {" "}
               {!isAnnouncementDetailLoading && activeAnnouncement && (
                 <>
-                  {activeAnnouncement?.mediaUrl && (
-                    <Box className="w-full h-40 md:h-48 overflow-hidden">
-                      <img
-                        src={activeAnnouncement.mediaUrl}
-                        alt={activeAnnouncement.subject}
-                        className="w-full h-full object-cover"
-                      />
-                    </Box>
-                  )}
+                  <MediaDisplay mediaUrls={parseMediaUrls(activeAnnouncement?.mediaUrl)} alt={activeAnnouncement?.subject || ""} />
 
                   <Box className="p-4 flex flex-col gap-3">
                     <Box className="space-y-1">

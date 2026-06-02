@@ -4,7 +4,9 @@ import type React from "react";
 import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, IconButton, CircularProgress } from "@mui/material";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CloseIcon from "@mui/icons-material/Close";
 import { CWTextField } from "@/modules/shared/component/FormFields/CWTextField";
 import { Button } from "@/modules/shared/component/Button";
 
@@ -56,6 +58,11 @@ export const CreateAnnouncementPage: React.FC = ({}) => {
     onSaveDraft,
     onSave,
     handleSubmit,
+    uploadedMedia,
+    isUploading,
+    MAX_MEDIA_ATTACHMENTS,
+    removeAttachment,
+    handleFileSelect,
   } = useCreateAnnouncementPage();
 
   const { data: duplicateSource } = useQueryService({
@@ -86,6 +93,51 @@ export const CreateAnnouncementPage: React.FC = ({}) => {
         inputClasses="mt-1 !text-sm !h-10 !text-input-gray"
         className="w-full"
       />
+
+      <Box>
+        <label
+          htmlFor="file-upload"
+          className={`flex items-center space-x-2 text-sm text-[#022F2F] ${isUploading || uploadedMedia.length >= MAX_MEDIA_ATTACHMENTS ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:underline"}`}
+        >
+          <AttachFileIcon fontSize="small" />
+          <span className="text-nowrap">Attach image or video (max {MAX_MEDIA_ATTACHMENTS})</span>
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          className="hidden"
+          accept="image/*,video/*"
+          multiple
+          onChange={handleFileSelect}
+          disabled={isUploading || uploadedMedia.length >= MAX_MEDIA_ATTACHMENTS}
+        />
+        <Box className="flex flex-wrap gap-2 mt-2">
+          {uploadedMedia.map((item, index) => (
+            <span
+              key={item.url}
+              className="flex items-center gap-1 text-xs text-gray-500 max-w-[180px] bg-gray-50 px-2 py-1 rounded"
+            >
+              <span className="truncate">{item.name}</span>
+              {!isUploading && (
+                <IconButton
+                  size="small"
+                  onClick={() => removeAttachment(index)}
+                  className="!p-0"
+                  aria-label="Remove attachment"
+                >
+                  <CloseIcon sx={{ fontSize: 14 }} />
+                </IconButton>
+              )}
+            </span>
+          ))}
+        </Box>
+        {isUploading && (
+          <Box className="flex items-center mt-2 gap-2 text-sm text-gray-500">
+             <CircularProgress size={16} /> Uploading...
+          </Box>
+        )}
+      </Box>
+
       <EditorComponent
         onChange={(_, data) => {
           setValue("content", data);

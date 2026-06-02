@@ -80,6 +80,7 @@ const useCreateAnnouncementPage = () => {
       const newEntries: { url: string; name: string }[] = [];
       for (const file of toAdd) {
         const isImage = file.type.startsWith("image/");
+        const isVideo = file.type.startsWith("video/");
         let url = "";
         if (isImage) {
           const formData = new FormData();
@@ -87,7 +88,7 @@ const useCreateAnnouncementPage = () => {
           formData.append("folder", "properties");
           const response: any = await uploadImageAsync(formData);
           url = response?.url ?? response?.data?.url ?? "";
-        } else {
+        } else if (isVideo) {
           const formData = new FormData();
           formData.append("file", file);
           formData.append("fileType", "video");
@@ -98,6 +99,17 @@ const useCreateAnnouncementPage = () => {
             response?.data?.url ??
             response?.file?.url ??
             response?.data?.file?.url ??
+            "";
+        } else {
+          const formData = new FormData();
+          formData.append("documents", file);
+          formData.append("folder", "properties");
+          const response: any = await uploadDocumentsAsync(formData);
+          url =
+            response?.url ??
+            response?.data?.url ??
+            response?.files?.[0]?.url ??
+            response?.data?.[0]?.url ??
             "";
         }
         if (url) newEntries.push({ url, name: file.name });

@@ -21,6 +21,7 @@ export * from "./SchoolNotificationSetting";
 export * from "./StudentReportDelivery";
 export * from "./School";
 export * from "./Role";
+export * from "./LearningActivity";
 export * from "./UserRole";
 export * from "./RolePermission";
 export * from "./Form";

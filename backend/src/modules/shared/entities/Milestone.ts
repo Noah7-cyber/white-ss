@@ -5,6 +5,7 @@ import { Subject } from "./Subject";
 import { GradingType, MilestoneStatus } from "./EntityEnums";
 import { StudentAssessmentScore } from "./StudentAssessmentScore";
 import { Duration } from "./Duration";
+import { LearningActivity } from "./LearningActivity";
 
 
 @Entity('milestones')
@@ -63,6 +64,16 @@ export class Milestone {
   })
   @JoinColumn({ name: 'subjectId' })
   subject!: Subject;
+
+  @Column({ type: 'int', nullable: true })
+  learningActivityId?: number;
+
+  @ManyToOne(() => LearningActivity, (activity) => activity.milestones, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'learningActivityId' })
+  learningActivity?: LearningActivity;
 
   @OneToMany(() => Duration, (duration) => duration.milestone, { onDelete: 'CASCADE' })
   durations!: Duration[];

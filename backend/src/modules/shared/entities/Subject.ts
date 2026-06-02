@@ -5,6 +5,7 @@ import { Milestone } from "./Milestone";
 import { Curriculum } from "./Curriculum";
 import { Skills } from "./EntityEnums";
 import { Duration } from "./Duration";
+import { LearningActivity } from "./LearningActivity";
 
 @Entity('subjects')
 export class Subject {
@@ -66,6 +67,9 @@ export class Subject {
 
   @OneToMany(() => Duration, (duration) => duration.subject)
   durations!: Duration[];
+
+  @OneToMany(() => LearningActivity, (learningActivity) => learningActivity.subject)
+  learningActivities!: LearningActivity[];
 
   @Column({ type: "int", nullable: true })
   schoolId?: number;

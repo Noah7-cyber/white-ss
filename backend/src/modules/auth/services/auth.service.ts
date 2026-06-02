@@ -1139,6 +1139,30 @@ export class AuthService {
   /**
    * Logout user
    */
+  async updateFcmToken(userId: number, token: string, action: "add" | "remove"): Promise<{ success: boolean; message: string }> {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        return { success: false, message: "User not found" };
+      }
+
+      const tokens = user.fcmTokens || [];
+      if (action === "add" && !tokens.includes(token)) {
+        tokens.push(token);
+        user.fcmTokens = tokens;
+        await this.userRepository.save(user);
+      } else if (action === "remove" && tokens.includes(token)) {
+        user.fcmTokens = tokens.filter((t: string) => t !== token);
+        await this.userRepository.save(user);
+      }
+
+      return { success: true, message: `FCM token ${action}ed successfully` };
+    } catch (error) {
+      console.error("Error updating FCM token in service:", error);
+      return { success: false, message: "Internal server error" };
+    }
+  }
+
   async logout(userId: number, sessionId?: number): Promise<AuthResponse> {
     try {
       if (sessionId) {

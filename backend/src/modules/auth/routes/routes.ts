@@ -70,6 +70,8 @@ authRoutes.post("/logout", (req, res) => authController.logout(req as any, res))
 
 authRoutes.post("/logout-all", (req, res) => authController.logoutAllDevices(req as any, res));
 
+authRoutes.post("/fcm-token", (req, res) => authController.updateFcmToken(req as any, res));
+
 authRoutes.get("/profile", (req, res) => authController.getProfile(req as any, res));
 
 authRoutes.get("/permissions", (req, res) => authController.getMyPermissions(req as any, res));

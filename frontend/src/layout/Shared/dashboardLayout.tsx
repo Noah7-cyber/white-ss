@@ -8,6 +8,7 @@ import { useMediaQuery } from "@/utils/hooks/useMediaQuery";
 import { shouldHideMobileDashboardHeader } from "@/utils/dashboardMobileHeader";
 import { showToast } from "@/modules/shared/component/Toast";
 import { QR_ROLE_BLOCKED_TOAST_KEY } from "@/utils/auth/sessionGuards";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -23,6 +24,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({
   showNotifications = true,
 }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  usePushNotifications();
   const pathname = usePathname();
   const isMobile = useMediaQuery("(max-width:768px)");
   const hideShellForStandaloneDetail =

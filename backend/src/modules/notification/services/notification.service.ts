@@ -1,4 +1,4 @@
-import { Repository, LessThan } from "typeorm";
+import { Repository, LessThan, In } from "typeorm";
 import { AppDataSource } from "../../core/config/database";
 import { Notification, NotificationType, NotificationPriority } from "../../shared/entities/Notification";
 import { SchoolNotificationSetting } from "../../shared/entities/SchoolNotificationSetting";
@@ -11,6 +11,7 @@ import { whatsappService } from "../../shared";
 import { getSchoolIdForRole } from "../../shared/utils/user-school";
 import { Admin } from "../../shared/entities/Admin";
 import { Student } from "../../shared/entities/StudentEntity";
+import { FirebaseNotification } from "../../shared/services/firebase.service";
 
 export class NotificationService {
   private notificationRepo: Repository<Notification>;
@@ -95,6 +96,27 @@ export class NotificationService {
       // Send real-time notification if user is connected
       if (websocketService.isUserConnected(data.userId)) {
         websocketService.sendNotificationToUser(data.userId, savedNotification);
+      }
+
+      // Send FCM push notification if applicable
+      if (user.enableInAppNotification !== false && user.fcmTokens && user.fcmTokens.length > 0) {
+        try {
+          const fcmHelper = new FirebaseNotification();
+          await fcmHelper.notify(
+            user.fcmTokens,
+            {
+              notificationId: String(savedNotification.id),
+              type: data.type,
+              url: data.actionUrl || "",
+            },
+            {
+              title: data.title,
+              body: data.message,
+            }
+          );
+        } catch (error) {
+          logger.error("Error sending FCM notification:", error);
+        }
       }
 
       // Fetch school notification settings
@@ -521,6 +543,34 @@ export class NotificationService {
           });
         }
       });
+
+      // Fetch users to get FCM tokens for bulk notifications
+      const users = await this.userRepo.find({
+        where: { id: In(data.userIds) },
+        select: ["id", "fcmTokens", "enableInAppNotification"]
+      });
+
+      const fcmHelper = new FirebaseNotification();
+
+      for (const user of users) {
+        if (user.enableInAppNotification !== false && user.fcmTokens && user.fcmTokens.length > 0) {
+          const notification = saved.find(n => n.userId === user.id);
+          if (notification) {
+            fcmHelper.notify(
+              user.fcmTokens,
+              {
+                notificationId: String(notification.id),
+                type: data.type,
+                url: data.actionUrl || "",
+              },
+              {
+                title: data.title,
+                body: data.message,
+              }
+            ).catch(err => logger.error(`Error sending bulk FCM to user ${user.id}:`, err));
+          }
+        }
+      }
 
       return {
         success: true,

@@ -51,6 +51,7 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.19",
     "eventemitter3": "^5.0.1",
+    "firebase": "^12.14.0",
     "framer-motion": "^12.23.9",
     "global": "^4.4.0",
     "html2canvas": "^1.4.1",

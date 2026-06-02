@@ -57,6 +57,12 @@ export const NewMessageModal: FC<NewMessageModalProps> = ({ isOpen, onClose }) =
     service: uploadServices.uploadDocuments,
     options: { isFormData: true, disableToast: true },
   });
+
+  const { mutateAsync: uploadFileAsync } = useMutationService({
+    service: uploadServices.uploadFile,
+    options: { isFormData: true, disableToast: true },
+  });
+
   const { mutateAsync: uploadImageAsync } = useMutationService({
     service: uploadServices.uploadImage,
     options: { isFormData: true, disableToast: true },
@@ -110,15 +116,17 @@ export const NewMessageModal: FC<NewMessageModalProps> = ({ isOpen, onClose }) =
           const response: any = await uploadImageAsync(formData);
           url = response?.url ?? response?.data?.url ?? "";
         } else {
+          // Video or other supported file type
           const formData = new FormData();
-          formData.append("documents", file);
+          formData.append("file", file);
+          formData.append("fileType", "video");
           formData.append("folder", "properties");
-          const response: any = await uploadDocumentsAsync(formData);
+          const response: any = await uploadFileAsync(formData);
           url =
             response?.url ??
             response?.data?.url ??
-            response?.files?.[0]?.url ??
-            response?.data?.[0]?.url ??
+            response?.file?.url ??
+            response?.data?.file?.url ??
             "";
         }
         if (url) newEntries.push({ url, name: file.name });
@@ -219,6 +227,11 @@ export const NewMessageModal: FC<NewMessageModalProps> = ({ isOpen, onClose }) =
         { name: "Staff", value: "TEACHER" },
         { name: "Admin", value: "ADMIN" },
       ]
+    : activeRole === "staff"
+    ? [
+        { name: "Parent", value: "PARENT" },
+        { name: "Admin", value: "ADMIN" },
+      ]
     : [
         { name: "Parent", value: "PARENT" },
         { name: "Teacher", value: "TEACHER" },
@@ -283,7 +296,7 @@ export const NewMessageModal: FC<NewMessageModalProps> = ({ isOpen, onClose }) =
       ...adminServices.getAllAdmins,
       data: { delta: 50 },
     },
-    options: { enabled: isOpen && isParentContext && sendTo === "ADMIN" },
+    options: { enabled: isOpen && (isParentContext || activeRole === "staff") && sendTo === "ADMIN" },
   });
 
   const adminsList = useMemo(

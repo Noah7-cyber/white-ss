@@ -42,14 +42,14 @@ export const validateCreateAnnouncement: ValidationChain[] = [
         .optional()
         .isString()
         .withMessage("Media URL must be a string")
-        .isLength({ max: 500 })
+        .isLength({ max: 5000 })
         .withMessage("Media URL must not exceed 500 characters"),
 
     body("link")
         .optional()
         .isString()
         .withMessage("Link must be a string")
-        .isLength({ max: 500 })
+        .isLength({ max: 5000 })
         .withMessage("Link must not exceed 500 characters"),
 ];
 
@@ -99,14 +99,14 @@ export const validateUpdateAnnouncement: ValidationChain[] = [
         .optional()
         .isString()
         .withMessage("Media URL must be a string")
-        .isLength({ max: 500 })
+        .isLength({ max: 5000 })
         .withMessage("Media URL must not exceed 500 characters"),
 
     body("link")
         .optional()
         .isString()
         .withMessage("Link must be a string")
-        .isLength({ max: 500 })
+        .isLength({ max: 5000 })
         .withMessage("Link must not exceed 500 characters"),
 ];
 

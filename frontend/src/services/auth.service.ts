@@ -213,6 +213,7 @@ const authEndpoints = {
     method: ApiMethods.POST,
   },
   verifyEmail: { path: `${authRoot}/verify-email`, method: ApiMethods.POST },
+  updateFcmToken: { path: `${authRoot}/fcm-token`, method: ApiMethods.POST },
   initResetPassword: {
     path: `${authRoot}/forgot-password`,
     method: ApiMethods.POST,

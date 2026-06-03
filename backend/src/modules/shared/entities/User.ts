@@ -118,6 +118,9 @@ export class User {
   @Column({ type: "boolean", default: false })
   enableWhatsAppNotification?: boolean;
 
+  @Column({ type: "simple-array", nullable: true })
+  fcmTokens?: string[];
+
   // Password management
   @Column({ select: false, type: "simple-array", nullable: true })
   passwordHistory?: string[];

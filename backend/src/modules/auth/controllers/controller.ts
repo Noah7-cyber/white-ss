@@ -70,6 +70,22 @@ export class AuthController {
     }
   }
 
+  async updateFcmToken(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      const { fcmToken, action } = req.body;
+      if (!fcmToken || (action !== "add" && action !== "remove")) {
+         res.status(400).json({ success: false, message: "Invalid request payload" });
+         return;
+      }
+
+      const result = await authService.updateFcmToken(req.user.id, fcmToken, action);
+      res.json(result);
+    } catch (error) {
+      console.error("Update FCM token error:", error);
+      res.status(500).json({ success: false, message: "Error updating FCM token" });
+    }
+  }
+
   async verifyMFA(req: Request, res: Response): Promise<void> {
     try {
       const deviceInfo = extractDeviceInfo(req);

@@ -43,7 +43,9 @@ export const usePushNotifications = () => {
 
       if (fcmToken) {
         // Send token to backend
-        await authServices.updateFcmToken({
+        const { default: client } = await import("../utils/client");
+        await client.request({
+          ...authServices.updateFcmToken,
           data: {
             fcmToken,
             action: "add"

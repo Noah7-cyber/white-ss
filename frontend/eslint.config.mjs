@@ -20,6 +20,7 @@ const eslintConfig = [
       "coverage",
       ".eslintcache",
       "public",
+      "scripts",
     ],
   },
 

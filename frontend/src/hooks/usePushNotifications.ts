@@ -1,7 +1,9 @@
+import type { Messaging } from "firebase/messaging";
 import { useEffect } from "react";
 import { getToken, onMessage, messaging } from "../lib/firebase";
 import { authServices } from "../services/auth.service";
 import { showToast } from "../modules/shared/component/Toast/toast";
+import client, { ApiMethods } from "../utils/client";
 
 export const usePushNotifications = () => {
   useEffect(() => {
@@ -36,19 +38,17 @@ export const usePushNotifications = () => {
     }
   }, []);
 
-  const registerToken = async (msg: any) => {
+  const registerToken = async (msg: Messaging) => {
     try {
       const fcmToken = await getToken(msg, {
         vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
       });
 
       if (fcmToken) {
-        // Send token to backend
-        await authServices.updateFcmToken({
-          data: {
-            fcmToken,
-            action: "add"
-          }
+        await client.request({
+          ...authServices.updateFcmToken,
+          method: authServices.updateFcmToken.method ?? ApiMethods.POST,
+          data: { fcmToken, action: "add" },
         });
         console.log("FCM Token registered with backend");
       }

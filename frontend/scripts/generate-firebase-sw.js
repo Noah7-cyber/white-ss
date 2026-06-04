@@ -76,27 +76,44 @@ const fileContents = `// AUTO-GENERATED FILE. Do not edit by hand.
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
 
-const firebaseConfig = ${JSON.stringify(firebaseConfig, null, 2)};
+const staticFirebaseConfig = ${JSON.stringify(firebaseConfig, null, 2)};
 
-try {
-  firebase.initializeApp(firebaseConfig);
+// Function to initialize messaging and listeners
+function initializeMessaging(config) {
+  if (firebase.apps.length === 0) {
+    try {
+      firebase.initializeApp(config);
 
-  const messaging = firebase.messaging();
+      const messaging = firebase.messaging();
 
-  messaging.onBackgroundMessage((payload) => {
-    console.log("[firebase-messaging-sw.js] Received background message ", payload);
-    const notificationTitle = payload.notification?.title || "New Notification";
-    const notificationOptions = {
-      body: payload.notification?.body,
-      icon: "/favicon.ico",
-      data: payload.data
-    };
+      messaging.onBackgroundMessage((payload) => {
+        console.log("[firebase-messaging-sw.js] Received background message ", payload);
+        const notificationTitle = payload.notification?.title || "New Notification";
+        const notificationOptions = {
+          body: payload.notification?.body,
+          icon: "/favicon.ico",
+          data: payload.data
+        };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
-  });
-} catch (error) {
-  console.log("Firebase SW initialization failed:", error);
+        self.registration.showNotification(notificationTitle, notificationOptions);
+      });
+    } catch (error) {
+      console.log("Firebase SW initialization failed:", error);
+    }
+  }
 }
+
+// Attempt initialization immediately if we have a config from build time
+if (staticFirebaseConfig && staticFirebaseConfig.apiKey) {
+  initializeMessaging(staticFirebaseConfig);
+}
+
+// Listen for config passed from the main app (fixes empty config on vercel/builds without env vars)
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'INIT_FIREBASE_SW' && event.data.firebaseConfig) {
+    initializeMessaging(event.data.firebaseConfig);
+  }
+});
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();

@@ -12,6 +12,7 @@ export enum StaffRoutes {
   resendEmailVerification = "/auth/resend-email-verification",
   refreshToken = "/auth/refresh-token",
   children = `${StaffRoutes.root}/children`,
+  parents = `${StaffRoutes.root}/parents`,
   myChild = `${StaffRoutes.root}/mychild`,
   addChildren = `${StaffRoutes.children}/add`,
   editChildren = `${StaffRoutes.children}/edit`,

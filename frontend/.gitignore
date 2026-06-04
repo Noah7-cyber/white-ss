@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env.example
 
 # vercel
 .vercel
@@ -41,3 +42,8 @@ yarn-error.log*
 next-env.d.ts
 build.sh
 deploy.sh
+server-deploy.sh
+
+
+# generated firebase service worker (built from env vars in scripts/generate-firebase-sw.js)
+/public/firebase-messaging-sw.js

@@ -23,6 +23,7 @@ import { useInfiniteQueryService } from "@/utils/hooks/useInfiniteQueryService";
 import { useMediaQuery } from "@/utils/hooks/useMediaQuery";
 import { MobileFormDrawer } from "../MobileFormDrawer/MobileFormDrawer";
 import { usePathname } from "next/navigation";
+import { useUser } from "@/utils/hooks/useUser";
 
 export const validationSchema = Yup.object().shape({
   sendTo: Yup.string().required("Send is required"),
@@ -46,6 +47,11 @@ export const NewMessageModal: FC<NewMessageModalProps> = ({ isOpen, onClose }) =
     return "unknown";
   }, [pathname]);
   const isParentContext = activeRole === "parent";
+  const { staffClassesAndSubject } = useUser();
+  const staffClassroomIds = useMemo(
+    () => staffClassesAndSubject.map(s => s.classroomId),
+    [staffClassesAndSubject],
+  );
   const [uploadedMedia, setUploadedMedia] = useState<{ url: string; name: string }[]>([]);
   const uploadedMediaRef = useRef(uploadedMedia);
   uploadedMediaRef.current = uploadedMedia;
@@ -281,7 +287,15 @@ export const NewMessageModal: FC<NewMessageModalProps> = ({ isOpen, onClose }) =
   } = useInfiniteQueryService<any, any>({
     service: {
       ...parentServices.getAllParents,
-      data: { delta: 50, status: "active", sortBy: "firstName", sortOrder: "ASC" },
+      data: {
+        delta: 50,
+        status: "active",
+        sortBy: "firstName",
+        sortOrder: "ASC",
+        ...(activeRole === "staff" && staffClassroomIds.length > 0
+          ? { classroomId: staffClassroomIds }
+          : {}),
+      },
     },
     options: { enabled: isOpen && !isParentContext && sendTo === "PARENT" },
   });

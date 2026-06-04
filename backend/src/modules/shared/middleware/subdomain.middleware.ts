@@ -69,8 +69,13 @@ async function resolveSchoolId(req: Request): Promise<{ school?: School; schoolI
     }
   }
 
-  // ## Fallback: X-School-ID header
-  const headerSchoolId = req.headers["school"] || req.headers["School"];
+  // ## Fallback: X-School-ID header (also accept legacy "school" header for backwards compatibility)
+  const headerSchoolId =
+    req.headers["x-school-id"] ||
+    req.headers["X-School-Id"] ||
+    req.headers["x-school-Id"] ||
+    req.headers["school"] ||
+    req.headers["School"];
   if (headerSchoolId) {
     try {
       const schoolId = parseInt(headerSchoolId as string, 10);

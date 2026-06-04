@@ -80,6 +80,9 @@ export function getFirebaseApp(): admin.app.App | null {
         logger.error("Error initializing Firebase admin for notifications:", err);
         return null;
     }
+
+    logger.warn("Firebase notification service account could not be loaded, FCM disabled");
+    return null;
 }
 
 /**

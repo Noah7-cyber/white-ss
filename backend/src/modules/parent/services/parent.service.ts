@@ -30,7 +30,7 @@ interface ParentFilters {
   pos?: number;
   delta?: number;
   schoolId?: number;
-  classroomId?: number;
+  classroomId?: number | number[];
   sortBy?: string;
   sortOrder?: "ASC" | "DESC";
 }
@@ -570,6 +570,10 @@ export class ParentService {
 
   async kioskVerify(identifier: string | number, pin: string, schoolId: number): Promise<any> {
     try {
+      // Normalize inputs. Stored emails are lowercased and PINs may have stray whitespace.
+      const rawIdentifier = typeof identifier === "string" ? identifier.trim() : identifier;
+      const normalizedPin = typeof pin === "string" ? pin.trim() : pin;
+
       // Build query to find parent by id, username, or email (scoped to school)
       const queryBuilder = this.parentRepository
         .createQueryBuilder("parent")
@@ -581,30 +585,47 @@ export class ParentService {
         .andWhere("parent.schoolId = :schoolId", { schoolId });
 
       // Check if identifier is a number (parent id)
-      const numericId = typeof identifier === "number" ? identifier : parseInt(identifier as string, 10);
+      const numericId =
+        typeof rawIdentifier === "number" ? rawIdentifier : parseInt(rawIdentifier as string, 10);
+      const stringIdentifier = String(rawIdentifier ?? "");
 
-      if (!isNaN(numericId) && numericId > 0) {
-        // Search by parent ID
+      if (!isNaN(numericId) && numericId > 0 && /^\d+$/.test(stringIdentifier)) {
+        // Search by parent ID (only when identifier is purely numeric)
         queryBuilder.andWhere("parent.id = :identifier", { identifier: numericId });
       } else {
-        // Search by username or email
-        queryBuilder.andWhere("(parent.username = :identifier OR user.email = :identifier)", { identifier: identifier as string });
+        // Search by username or email (case-insensitive, mirrors staff/admin behaviour)
+        queryBuilder.andWhere(
+          "(LOWER(parent.username) = LOWER(:identifier) OR LOWER(user.email) = LOWER(:identifier))",
+          { identifier: stringIdentifier }
+        );
       }
 
       const parent = await queryBuilder.getOne();
 
       if (!parent) {
+        logger?.warn?.("[kioskVerify:parent] no parent matched", {
+          schoolId,
+          identifier: stringIdentifier,
+        });
         return null;
       }
 
       // Verify PIN (plain text comparison for kiosk)
       if (!parent.pin) {
-        return null; // No PIN set for this parent
+        logger?.warn?.("[kioskVerify:parent] parent has no PIN set", {
+          parentId: parent.id,
+          schoolId,
+        });
+        return null;
       }
 
-      // Plain text comparison for kiosk verification
-      if (pin !== parent.pin) {
-        return null; // Invalid PIN
+      // Plain text comparison for kiosk verification (trim stored value defensively)
+      if (normalizedPin !== String(parent.pin).trim()) {
+        logger?.warn?.("[kioskVerify:parent] PIN mismatch", {
+          parentId: parent.id,
+          schoolId,
+        });
+        return null;
       }
 
       const scopedChildren = (parent.children || []).filter((c: any) => c?.schoolId === parent.schoolId);
@@ -728,18 +749,23 @@ export class ParentService {
         .where("parent.schoolId = :schoolId", { schoolId })
         .andWhere("parent.deletedAt IS NULL");
 
-      // Filter by classroomId if provided
-      if (filters?.classroomId) {
-        queryBuilder.andWhere(qb => {
-          const subQuery = qb.subQuery()
-            .select("1")
-            .from("parent_student", "ps")
-            .innerJoin("student", "s", "s.id = ps.studentId")
-            .where("ps.parentId = parent.id")
-            .andWhere("s.classroomId = :classroomId", { classroomId: filters.classroomId })
-            .getQuery();
-          return `EXISTS (${subQuery})`;
-        });
+      // Filter by classroomId if provided — accepts a single id or an array of ids
+      if (filters?.classroomId !== undefined && filters.classroomId !== null) {
+        const classroomIds = Array.isArray(filters.classroomId)
+          ? filters.classroomId
+          : [filters.classroomId];
+        if (classroomIds.length > 0) {
+          queryBuilder.andWhere(qb => {
+            const subQuery = qb.subQuery()
+              .select("1")
+              .from("parent_student", "ps")
+              .innerJoin("student", "s", "s.id = ps.studentId")
+              .where("ps.parentId = parent.id")
+              .andWhere("s.classroomId IN (:...classroomIds)", { classroomIds })
+              .getQuery();
+            return `EXISTS (${subQuery})`;
+          });
+        }
       }
 
       queryBuilder.groupBy("parent.id")

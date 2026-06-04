@@ -448,6 +448,12 @@ export const staffSidebarItems: SidebarItemProps[] = [
     path: StaffRoutes.children,
   },
   {
+    id: 10,
+    label: "Parents",
+    icon: <Image src="/assets/svg/hugeicons_child.svg" alt="parents" width={18} height={18} />,
+    path: StaffRoutes.parents,
+  },
+  {
     id: 3,
     label: "Classroom",
     path: StaffRoutes.classRooms,

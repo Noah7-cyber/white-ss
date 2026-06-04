@@ -175,6 +175,13 @@ export class FirebaseNotification {
                     title: notification.title,
                     body: notification.body,
                 },
+                webpush: {
+                    headers: { Urgency: "high" },
+                    notification: {
+                        title: notification.title,
+                        body: notification.body,
+                    },
+                },
             });
         } catch (error: any) {
             logger.error(

@@ -42,30 +42,47 @@ function loadNotificationServiceAccount(): admin.ServiceAccount | null {
 }
 
 /**
- * Firebase app for push notifications (FCM). Uses service account JSON file.
+ * Firebase app for push notifications (FCM).
+ * Tries the service account JSON file first; falls back to env vars (firebaseConfig).
  */
 export function getFirebaseApp(): admin.app.App | null {
     const defaultApp = admin.apps.find((a) => a?.name === "[DEFAULT]");
     if (defaultApp) return defaultApp as admin.app.App;
 
+    // Try JSON file first
     const serviceAccount = loadNotificationServiceAccount();
-    if (!serviceAccount) {
-        logger.warn(
-            "Firebase notification service account could not be loaded, FCM disabled"
-        );
-        return null;
+    if (serviceAccount) {
+        try {
+            const app = admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+            logger.info("Firebase admin initialized (push notifications, from JSON)");
+            return app;
+        } catch (err) {
+            logger.error("Error initializing Firebase admin for notifications (JSON):", err);
+        }
     }
 
-    try {
-        const app = admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-        });
-        logger.info("Firebase admin initialized (push notifications, from JSON)");
-        return app;
-    } catch (err) {
-        logger.error("Error initializing Firebase admin for notifications:", err);
-        return null;
+    // Fall back to env vars (same project as storage)
+    const cfg = firebaseConfig;
+    if (cfg?.projectId && cfg?.clientEmail && cfg?.privateKey?.trim()) {
+        try {
+            const app = admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId: cfg.projectId,
+                    clientEmail: cfg.clientEmail,
+                    privateKey: cfg.privateKey,
+                } as admin.ServiceAccount),
+            });
+            logger.info("Firebase admin initialized (push notifications, from env vars)");
+            return app;
+        } catch (err) {
+            logger.error("Error initializing Firebase admin for notifications (env vars):", err);
+        }
     }
+
+    logger.warn("Firebase notification service account could not be loaded, FCM disabled");
+    return null;
 }
 
 /**

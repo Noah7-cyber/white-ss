@@ -30,7 +30,7 @@ interface ParentFilters {
   pos?: number;
   delta?: number;
   schoolId?: number;
-  classroomId?: number;
+  classroomId?: number | number[];
   sortBy?: string;
   sortOrder?: "ASC" | "DESC";
 }
@@ -749,18 +749,23 @@ export class ParentService {
         .where("parent.schoolId = :schoolId", { schoolId })
         .andWhere("parent.deletedAt IS NULL");
 
-      // Filter by classroomId if provided
-      if (filters?.classroomId) {
-        queryBuilder.andWhere(qb => {
-          const subQuery = qb.subQuery()
-            .select("1")
-            .from("parent_student", "ps")
-            .innerJoin("student", "s", "s.id = ps.studentId")
-            .where("ps.parentId = parent.id")
-            .andWhere("s.classroomId = :classroomId", { classroomId: filters.classroomId })
-            .getQuery();
-          return `EXISTS (${subQuery})`;
-        });
+      // Filter by classroomId if provided — accepts a single id or an array of ids
+      if (filters?.classroomId !== undefined && filters.classroomId !== null) {
+        const classroomIds = Array.isArray(filters.classroomId)
+          ? filters.classroomId
+          : [filters.classroomId];
+        if (classroomIds.length > 0) {
+          queryBuilder.andWhere(qb => {
+            const subQuery = qb.subQuery()
+              .select("1")
+              .from("parent_student", "ps")
+              .innerJoin("student", "s", "s.id = ps.studentId")
+              .where("ps.parentId = parent.id")
+              .andWhere("s.classroomId IN (:...classroomIds)", { classroomIds })
+              .getQuery();
+            return `EXISTS (${subQuery})`;
+          });
+        }
       }
 
       queryBuilder.groupBy("parent.id")

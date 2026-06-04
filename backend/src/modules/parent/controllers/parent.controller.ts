@@ -192,11 +192,21 @@ export class ParentController {
 
             const { pos, delta, search, classroomId, sortBy, sortOrder } = req.query;
 
+            const parseClassroomId = (value: unknown): number | number[] | undefined => {
+                if (!value) return undefined;
+                if (Array.isArray(value)) {
+                    const ids = (value as string[]).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+                    return ids.length > 0 ? ids : undefined;
+                }
+                const single = parseInt(value as string, 10);
+                return isNaN(single) ? undefined : single;
+            };
+
             const filters = {
                 pos: pos ? parseInt(pos as string, 10) : 0,
                 delta: delta ? parseInt(delta as string, 10) : 10,
                 search: search ? String(search) : undefined,
-                classroomId: classroomId ? parseInt(classroomId as string, 10) : undefined,
+                classroomId: parseClassroomId(classroomId),
                 schoolId,
                 ...(sortBy && { sortBy: sortBy as string }),
                 ...(sortOrder && { sortOrder: sortOrder as "ASC" | "DESC" }),

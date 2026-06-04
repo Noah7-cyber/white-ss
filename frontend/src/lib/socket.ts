@@ -2,7 +2,7 @@
 import io from "socket.io-client";
 import { getAccessTokenFromCookie } from "@/utils/helper";
 
-const apiUrl = process.env.WEBSOCKET_URL || "https://whitepenguin-api.heimdallprodev.com/";
+const apiUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || "https://whitepenguin-api.heimdallprodev.com/";
 
 export const socket = io(apiUrl, {
   transports: ["websocket"],

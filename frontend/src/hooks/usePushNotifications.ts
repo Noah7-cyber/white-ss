@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { getToken, onMessage, messaging } from "../lib/firebase";
 import { authServices } from "../services/auth.service";
+import { showToast } from "../modules/shared/component/Toast/toast";
 
 export const usePushNotifications = () => {
   useEffect(() => {
@@ -38,7 +39,7 @@ export const usePushNotifications = () => {
   const registerToken = async (msg: any) => {
     try {
       const fcmToken = await getToken(msg, {
-         // Optionally you can provide vapidKey here if you use web push certificates
+        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
       });
 
       if (fcmToken) {
@@ -52,11 +53,16 @@ export const usePushNotifications = () => {
         console.log("FCM Token registered with backend");
       }
 
-      // Handle foreground messages
+      // Handle foreground messages (tab is open)
       onMessage(msg, (payload) => {
-         console.log("Received foreground message:", payload);
-         // The service worker handles background notifications.
-         // For foreground, you might want to show a toast or update UI
+        const title = payload.notification?.title || "New Notification";
+        const body = payload.notification?.body;
+        showToast({
+          message: title,
+          description: body,
+          severity: "info",
+          duration: 6000,
+        });
       });
 
     } catch (error) {

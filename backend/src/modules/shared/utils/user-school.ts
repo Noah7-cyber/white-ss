@@ -45,6 +45,7 @@ export function inferSchoolIdsFromUserPayload(user: any): number[] {
   if (role === UserRole.PARENT) return pickSchoolIds(user.parent);
   if (role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN) return pickSchoolIds(user.admin);
   if (role === UserRole.STUDENT) return pickSchoolIds(user.student);
+  if (role === UserRole.SYSTEM_ADMIN) return [];
 
   return [];
 }
@@ -89,6 +90,8 @@ export async function getSchoolIdsForRole(
         new Set(rows.map((r) => r.schoolId).filter((id): id is number => isValidSchoolId(id)))
       );
     }
+    case UserRole.SYSTEM_ADMIN:
+      return [];
     default:
       return [];
   }

@@ -32,6 +32,7 @@ export class InvitationController {
 
       // Role hierarchy validation
       const roleHierarchy = {
+        [UserRole.SYSTEM_ADMIN]: 7,
         [UserRole.SUPER_ADMIN]: 6,
         [UserRole.ADMIN]: 5,
         [UserRole.STAFF]: 4,

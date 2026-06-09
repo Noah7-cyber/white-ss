@@ -201,6 +201,8 @@ export interface AuthResponse {
   requiresMFA?: boolean;
   mfaToken?: string;
   message: string;
+  /** When set, controllers use this instead of default 401/400 for failed auth. */
+  httpStatus?: number;
   /** Machine-readable error code for the frontend to branch on (e.g. "EMAIL_NOT_VERIFIED") */
   code?: string;
   // Grouped structure requested by client

@@ -7,6 +7,9 @@ import { schoolSubscriptionService } from "../services/school-subscription.servi
  */
 const ALLOWLIST_PREFIXES = [
   "/api/v1/auth",
+  "/api/v1/system-admin/auth",
+  "/api/v1/system-admin/invitations",
+  "/api/v1/system-admin/staff",
   "/api/v1/sessions",
   "/api/v1/subscriptions",
   "/api/v1/countries",

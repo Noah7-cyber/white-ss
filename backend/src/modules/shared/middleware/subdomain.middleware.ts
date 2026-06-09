@@ -201,6 +201,13 @@ export const subdomainGuard = async (req: Request, _res: Response, next: NextFun
   const resolvedSchoolId = (req as SchoolRequest).schoolId;
 
   if (authReq.user && resolvedSchoolId) {
+    if (authReq.user.role === UserRole.SYSTEM_ADMIN) {
+      authReq.user.schoolId = resolvedSchoolId;
+      authReq.user.school = school;
+      next();
+      return;
+    }
+
     try {
       const identity = {
         email: authReq.user.email,

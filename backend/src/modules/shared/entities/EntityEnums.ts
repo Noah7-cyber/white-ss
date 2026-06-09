@@ -96,6 +96,7 @@ export enum UserRole {
   PARENT = "parent",
   ADMIN = "admin",
   SUPER_ADMIN = "super_admin",
+  SYSTEM_ADMIN = "system_admin",
 }
 
 export enum Suffix {

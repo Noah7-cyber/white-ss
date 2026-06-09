@@ -59,7 +59,7 @@ export class AuthController {
 
       const result = await authService.login({ ...req.body, schoolId: contextSchoolId ?? bodySchoolId }, deviceInfo);
 
-      const statusCode = result.success ? 200 : 401;
+      const statusCode = result.success ? 200 : result.httpStatus ?? 401;
       res.status(statusCode).json(result);
     } catch (error) {
       console.error("Login error:", error);

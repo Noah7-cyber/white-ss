@@ -50,9 +50,19 @@ const READ_ONLY: Action[] = [
     Action.VIEW,
 ];
 
+function fullResourcePermissions(): Permission {
+    const perm: Permission = {};
+    for (const resource of Object.values(Resources)) {
+        perm[resource] = CRUD;
+    }
+    return perm;
+}
 
+const SYSTEM_ADMIN_PERMISSIONS = fullResourcePermissions();
 
 export const ROLE_PERMISSIONS: Record<UserRole, Permission> = {
+    [UserRole.SYSTEM_ADMIN]: SYSTEM_ADMIN_PERMISSIONS,
+
     [UserRole.SUPER_ADMIN]: {
         [Resources.STAFF]: CRUD,
         [Resources.STUDENT]: CRUD,

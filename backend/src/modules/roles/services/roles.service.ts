@@ -681,7 +681,7 @@ export class RolesService {
     const resolvedSchoolId = typeof schoolId === "number" && !Number.isNaN(schoolId) && schoolId > 0 ? schoolId : user.schoolId;
 
     if (!resolvedSchoolId) {
-      if (user.role === SystemUserRole.SUPER_ADMIN) {
+      if (user.role === SystemUserRole.SUPER_ADMIN || user.role === SystemUserRole.SYSTEM_ADMIN) {
         return {
           success: true,
           data: {

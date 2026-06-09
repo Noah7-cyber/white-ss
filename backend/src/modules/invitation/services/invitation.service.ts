@@ -79,6 +79,13 @@ class InvitationService {
    */
   async createInvitation(data: CreateInvitationData): Promise<{ success: boolean; message: string; invitation?: InvitationResult }> {
     try {
+      if (data.role === UserRole.SYSTEM_ADMIN) {
+        return {
+          success: false,
+          message: "System admin accounts cannot be invited to a school",
+        };
+      }
+
       // Check if user already has this specific role in this school
       const user = await this.userRepository.findOne({
         where: { email: data.email },

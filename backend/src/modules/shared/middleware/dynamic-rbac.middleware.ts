@@ -18,7 +18,7 @@ export async function dynamicRbacMiddleware(req: Request, res: Response, next: N
       return;
     }
 
-    if (authReq.user.role === UserRole.SUPER_ADMIN) {
+    if (authReq.user.role === UserRole.SUPER_ADMIN || authReq.user.role === UserRole.SYSTEM_ADMIN) {
       next();
       return;
     }

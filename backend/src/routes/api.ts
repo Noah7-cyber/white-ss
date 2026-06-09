@@ -43,6 +43,11 @@ import cityRoutes from "../modules/shared/routes/city.route";
 import { portfolioRoutes } from "../modules/portfolio";
 import { FormRoutes } from "../modules/form";
 import { subscriptionRoutes } from "../modules/subscription";
+import {
+  systemAdminAuthRoutes,
+  systemAdminInvitationRoutes,
+  systemAdminStaffRoutes,
+} from "../modules/systemAdmin";
 
 const router = Router();
 
@@ -69,6 +74,9 @@ router.use("/activity-logs", activityLogRoutes);
 router.use("/notifications/whatsapp-webhook", whatsAppWebhookRoutes);
 router.use("/notifications", notificationRouter);
 router.use("/auth", authRoutes);
+router.use("/system-admin/auth", systemAdminAuthRoutes);
+router.use("/system-admin/invitations", systemAdminInvitationRoutes);
+router.use("/system-admin/staff", systemAdminStaffRoutes);
 router.use("/roles", rolesRoutes);
 router.use("/users", userStatsRoutes);
 router.use("/profile", ProfileRoutes);

@@ -24,6 +24,9 @@ const PUBLIC_PATH_EXACT = new Set([
   "/auth/refresh",
   "/auth/verify-mfa",
   "/auth/health",
+  "/system-admin/auth/login",
+  "/system-admin/auth/verify-mfa",
+  "/system-admin/invitations/accept",
   // Public invitation endpoints (token-based, no auth required)
   "/invitation/validate",
   "/invitation/accept",

@@ -22,6 +22,8 @@ export class UserAssociationService {
         const manager = options?.manager || AppDataSource.manager;
 
         switch (role) {
+            case UserRole.SYSTEM_ADMIN:
+                return;
             case UserRole.ADMIN:
             case UserRole.SUPER_ADMIN:
                 return await adminRecordService.ensureForUser({

@@ -158,6 +158,12 @@ export class AuthService {
       const hashedPassword = await validationService.hashPassword(data.password);
 
       const resolvedRole = invitationRole || data.role || UserRole.PARENT;
+      if (resolvedRole === UserRole.SYSTEM_ADMIN) {
+        return {
+          success: false,
+          message: "System admin accounts cannot be registered through this endpoint",
+        };
+      }
       const resolvedSchoolId = typeof invitationSchoolId === "number" && !Number.isNaN(invitationSchoolId) ? invitationSchoolId : undefined;
 
       // Create user
@@ -455,6 +461,14 @@ export class AuthService {
         return {
           success: false,
           message: AUTH_MESSAGES.ACCOUNT_DEACTIVATED,
+        };
+      }
+
+      if (activeUser.role === UserRole.SYSTEM_ADMIN) {
+        return {
+          success: false,
+          message: "This account uses system admin login. Please use POST /api/v1/system-admin/auth/login",
+          httpStatus: 403,
         };
       }
 

@@ -62,6 +62,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     else if (requestedRole === UserRole.PARENT) relations.push('parent');
     else if (requestedRole === UserRole.ADMIN || requestedRole === UserRole.SUPER_ADMIN) relations.push('admin');
     else if (requestedRole === UserRole.STUDENT) relations.push('student');
+    // SYSTEM_ADMIN: no school-scoped relations
 
     // Get user from database
     const userRepository = AppDataSource.getRepository(User);
@@ -80,6 +81,38 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 
     const contextSchoolId =
       typeof (req as any).schoolId === "number" && !Number.isNaN((req as any).schoolId) ? (req as any).schoolId : undefined;
+
+    if (requestedRole === UserRole.SYSTEM_ADMIN) {
+      if (payload.sessionId) {
+        const session = await sessionService.validateSession(payload.sessionId);
+        if (!session) {
+          res.status(401).json({
+            success: false,
+            message: AUTH_MESSAGES.SESSION_EXPIRED,
+            code: "SESSION_EXPIRED",
+          });
+          return;
+        }
+        (req as AuthenticatedRequest).sessionId = payload.sessionId;
+      }
+
+      const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+      (req as AuthenticatedRequest).user = {
+        id: user.id,
+        email: user.email || undefined,
+        phone: user.phone || undefined,
+        name: displayName || user.lastName,
+        role: UserRole.SYSTEM_ADMIN,
+        isActive: user.isActive,
+        emailVerified: user.emailVerified,
+        phoneVerified: user.phoneVerified,
+        mfaEnabled: user.mfaEnabled,
+        schoolId: typeof contextSchoolId === "number" ? contextSchoolId : undefined,
+      };
+      req.__wpAuthenticateDone = true;
+      next();
+      return;
+    }
 
     // If a tenant context is explicitly provided, filter role accounts to that school only.
     // This prevents cross-school leakage and also ensures downstream code picks the correct account.
@@ -237,6 +270,27 @@ export const optionalAuth = async (req: Request, _res: Response, next: NextFunct
         const contextSchoolId =
           typeof (req as any).schoolId === "number" && !Number.isNaN((req as any).schoolId) ? (req as any).schoolId : undefined;
 
+        if (requestedRole === UserRole.SYSTEM_ADMIN) {
+          const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+          (req as AuthenticatedRequest).user = {
+            id: user.id,
+            email: user.email || undefined,
+            phone: user.phone || undefined,
+            name: displayName || user.lastName,
+            role: UserRole.SYSTEM_ADMIN,
+            isActive: user.isActive,
+            emailVerified: user.emailVerified,
+            phoneVerified: user.phoneVerified,
+            mfaEnabled: user.mfaEnabled,
+            schoolId: typeof contextSchoolId === "number" ? contextSchoolId : undefined,
+          };
+          if (payload.sessionId) {
+            (req as AuthenticatedRequest).sessionId = payload.sessionId;
+          }
+          next();
+          return;
+        }
+
         if (typeof contextSchoolId === "number") {
           if (requestedRole === UserRole.STAFF) {
             const list = Array.isArray((user as any).teacher) ? (user as any).teacher : (user as any).teacher ? [(user as any).teacher] : [];
@@ -358,6 +412,11 @@ export const requireAdmin = requireRole(["admin", "super_admin"]);
  * Super admin only middleware
  */
 export const requireSuperAdmin = requireRole(["super_admin"]);
+
+/**
+ * Platform system admin only
+ */
+export const requireSystemAdmin = requireRole(["system_admin"]);
 
 /**
  * Agent or admin middleware

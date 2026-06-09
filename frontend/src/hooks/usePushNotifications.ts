@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { getToken, onMessage, messaging } from "../lib/firebase";
 import { authServices } from "../services/auth.service";
+import client from "../utils/client";
 import { showToast } from "../modules/shared/component/Toast/toast";
 
 export const usePushNotifications = () => {
@@ -44,7 +45,9 @@ export const usePushNotifications = () => {
 
       if (fcmToken) {
         // Send token to backend
-        await authServices.updateFcmToken({
+        await client.request({
+          path: authServices.updateFcmToken.path,
+          method: authServices.updateFcmToken.method,
           data: {
             fcmToken,
             action: "add"

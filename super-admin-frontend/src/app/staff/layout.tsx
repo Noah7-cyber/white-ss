@@ -12,29 +12,8 @@ function StaffLayoutContent({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    runRoleGuard("staff", router.replace);
+    router.replace("/admin/dashboard");
   }, [router]);
-
-  if (status === "loading" || typeof window === "undefined") {
-    return <SchoolLogoLoading />;
-  }
-
-  if (typeof window !== "undefined") {
-    try {
-      const accessToken = hasAccessToken();
-      const userRole = getEffectiveRole();
-
-      if (accessToken && userRole === "staff") {
-        return <StaffDashboardLayout>{children}</StaffDashboardLayout>;
-      }
-      if (!accessToken || !userRole) {
-        return <SchoolLogoLoading />;
-      }
-      return <SchoolLogoLoading />;
-    } catch (error) {
-      console.error("Failed to parse auth data:", error);
-    }
-  }
 
   return <SchoolLogoLoading />;
 }

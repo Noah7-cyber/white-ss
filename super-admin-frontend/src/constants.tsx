@@ -822,7 +822,6 @@ export const paymentHistoryHeaders = [
   "Miscellaneous",
   "Amount",
   "Status",
-  "Action",
 ];
 
 // const STATUS_STYLES: Record<string, { dot: string; chip: string }> = {
@@ -990,7 +989,6 @@ export const pipelineTableHeaders = [
   "Parent(s)",
   "Status",
   "Sources",
-  "Action",
 ];
 
 export const statusOptions = ["All Status", "Pass", "Failed"];

@@ -2,7 +2,7 @@
 
 import { redirectToAuthRoute, isOnAuthDomain, isSubdomainMismatch } from "@/utils/helper";
 
-export type AppRole = "admin" | "staff" | "parent";
+export type AppRole = "systemAdmin";
 
 type GuardDecision =
   | { type: "allow" }
@@ -11,15 +11,11 @@ type GuardDecision =
 export const QR_ROLE_BLOCKED_TOAST_KEY = "qr:role-blocked-toast";
 
 const roleHomePath: Record<AppRole, string> = {
-  admin: "/admin/dashboard",
-  staff: "/staff/dashboard",
-  parent: "/parent",
+  systemAdmin: "/admin/dashboard",
 };
 
 const roleAuthPath: Record<AppRole, string> = {
-  admin: "/auth/select-role",
-  staff: "/auth/login",
-  parent: "/auth/login",
+  systemAdmin: "/auth/login",
 };
 
 function getCurrentPathWithQuery(): string {
@@ -31,15 +27,6 @@ function buildRoleAuthTarget(requiredRole: AppRole): string {
   const authRoute = roleAuthPath[requiredRole];
   const currentPathWithQuery = getCurrentPathWithQuery();
 
-  if (requiredRole === "parent" || requiredRole === "staff") {
-    const params = new URLSearchParams();
-    params.set("role", requiredRole);
-    if (currentPathWithQuery) {
-      params.set("returnUrl", currentPathWithQuery);
-    }
-    return `${authRoute}?${params.toString()}`;
-  }
-
   if (!currentPathWithQuery) return authRoute;
   return `${authRoute}?returnUrl=${encodeURIComponent(currentPathWithQuery)}`;
 }
@@ -49,7 +36,7 @@ export function getEffectiveRole(): AppRole | null {
   const match = document.cookie.split("; ").find((row) => row.startsWith("userRole="));
   if (!match) return null;
   const value = decodeURIComponent(match.split("=").slice(1).join("=").trim()).toLowerCase();
-  if (value === "admin" || value === "staff" || value === "parent") return value;
+  if (value === "systemadmin") return "systemAdmin";
   return null;
 }
 
@@ -79,9 +66,6 @@ export function evaluateRoleAccess(requiredRole: AppRole): GuardDecision {
   const token = hasAccessToken();
   const userRole = getEffectiveRole();
 
-  // On pure localhost there are no subdomains — every route shares the same origin.
-  // Only redirect to the auth domain when we are on a *real* subdomain-based auth domain
-  // (e.g. app.whitepenguin.ng), not when running on localhost or 127.0.0.1.
   if (isOnAuthDomain()) {
     const hostname = typeof window !== "undefined" ? window.location.hostname : "";
     const isLocalhostVariant =
@@ -114,21 +98,6 @@ export function evaluateRoleAccess(requiredRole: AppRole): GuardDecision {
 export function runRoleGuard(requiredRole: AppRole, routerReplace: (path: string) => void): boolean {
   const decision = evaluateRoleAccess(requiredRole);
   if (decision.type === "allow") return true;
-
-  if (typeof window !== "undefined") {
-    const isParentQrEntryAttempt =
-      requiredRole === "parent" &&
-      window.location.pathname === "/parent/children" &&
-      new URLSearchParams(window.location.search).get("openAttendanceModal") === "1";
-
-    const userRole = getEffectiveRole();
-    const isRoleMismatchRedirect =
-      Boolean(userRole) && decision.target === roleHomePath[userRole as AppRole];
-
-    if (isParentQrEntryAttempt && isRoleMismatchRedirect) {
-      window.sessionStorage.setItem(QR_ROLE_BLOCKED_TOAST_KEY, "1");
-    }
-  }
 
   if (decision.crossDomain && redirectToAuthRoute(decision.target)) {
     return false;

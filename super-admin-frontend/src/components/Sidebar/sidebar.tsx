@@ -113,7 +113,7 @@ const SidebarItems: React.FC<SidebarItemProps> = ({
 };
 
 interface SidebarProps {
-  role: "admin" | "staff" | "parent";
+  role: "systemAdmin";
   isOpen?: boolean;
   onClose?: () => void;
   hideContent?: boolean;
@@ -213,7 +213,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex flex-col font-bold text-sm text-brandColor-active">
             <div className="flex gap-1 items-center">
               <SchoolLogo />{" "}
-              {role === "admin" && (
+              {role === "systemAdmin" && (
                 <div className="">
                   <AdminLogo />
                 </div>
@@ -277,14 +277,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <div
-          className={`${role === "admin" ? "p-4 pb-6 relative" : "p-4 pb-6 relative"} ${
+          className={`${role === "systemAdmin" ? "p-4 pb-6 relative" : "p-4 pb-6 relative"} ${
             hideContent ? "hidden" : ""
           }`}
           style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
         >
           <div
             className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-              (role === "parent" || role === "admin" || role === "staff") && isProfileActive
+              (role === "parent" || role === "systemAdmin" || role === "staff") && isProfileActive
                 ? "bg-brandColor-active"
                 : "bg-dashboard-bg hover:bg-gray-100"
             }`}
@@ -294,7 +294,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           >
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center overflow-hidden ${
-                (role === "parent" || role === "admin" || role === "staff") && isProfileActive
+                (role === "parent" || role === "systemAdmin" || role === "staff") && isProfileActive
                   ? "bg-brandColor-active"
                   : "bg-gray-300"
               }`}
@@ -309,7 +309,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               ) : (
                 <ProfileIcon
                   className={
-                    (role === "admin" || role === "parent" || role === "staff") && isProfileActive
+                    (role === "systemAdmin" || role === "parent" || role === "staff") && isProfileActive
                       ? "text-white"
                       : ""
                   }
@@ -319,7 +319,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="flex-1">
               <div
                 className={`text-sm font-medium ${
-                  (role === "parent" || role === "admin" || role === "staff") && isProfileActive
+                  (role === "parent" || role === "systemAdmin" || role === "staff") && isProfileActive
                     ? "text-white"
                     : "text-gray-900"
                 }`}
@@ -331,7 +331,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div
               className={
-                (role === "parent" || role === "admin" || role === "staff") && isProfileActive
+                (role === "parent" || role === "systemAdmin" || role === "staff") && isProfileActive
                   ? "text-white"
                   : "text-gray-400"
               }
@@ -375,7 +375,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               isLoggingOut={isLoggingOut}
             />
           )}
-          {role === "admin" && (
+          {role === "systemAdmin" && (
             <AdminProfilePopover
               open={open}
               anchorEl={anchorEl}
@@ -399,7 +399,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {role === "admin" && (
+      {role === "systemAdmin" && (
         <AdminModals
           changePasswordModalOpen={changePasswordModalOpen}
           onCloseChangePassword={() => setChangePasswordModalOpen(false)}

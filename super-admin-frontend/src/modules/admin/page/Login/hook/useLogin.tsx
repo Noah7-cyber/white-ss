@@ -256,6 +256,13 @@ export function useLogin(explicitRole?: LoginRoleParam) {
         severity: "success",
       });
       router.push(ParentRoutes.dashboard);
+    } else if (effectiveRole === "system_admin") {
+      showToast({
+        message: "Login successful!",
+        description: "You're now signed in.",
+        severity: "success",
+      });
+      router.push("/admin/dashboard");
     } else {
       showToast({
         message: "Login successful!",

@@ -36,7 +36,7 @@ export function getEffectiveRole(): AppRole | null {
   const match = document.cookie.split("; ").find((row) => row.startsWith("userRole="));
   if (!match) return null;
   const value = decodeURIComponent(match.split("=").slice(1).join("=").trim()).toLowerCase();
-  if (value === "systemadmin") return "systemAdmin";
+  if (value === "systemadmin" || value === "system_admin") return "systemAdmin";
   return null;
 }
 

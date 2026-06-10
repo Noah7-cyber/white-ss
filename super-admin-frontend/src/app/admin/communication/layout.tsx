@@ -52,9 +52,7 @@ export default function CommunicationLayout({ children }: CommunicationLayoutPro
         <Typography className="text-xl! font-semibold! text-primary-gray! ">
           Communication
         </Typography>
-        <Button className="!rounded-lg !px-4 !py-2" onClick={handleOpenNewMessage}>
-          + New Message
-        </Button>
+        {/* Hidden New Message button for read-only System Admin view */}
       </Box>
 
       <ScrollableTabBar className="border-b! border-border-lighten!">

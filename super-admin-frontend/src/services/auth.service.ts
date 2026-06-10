@@ -5,7 +5,7 @@ import { ApiMethods } from "@/utils/client";
 // ========================
 // AUTH ROOT
 // ========================
-const authRoot = "/api/v1/auth";
+const authRoot = "/api/v1/system-admin/auth";
 
 // ========================
 // REQUEST & RESPONSE TYPES
@@ -233,15 +233,15 @@ const authEndpoints = {
   userProfile: { path: `${authRoot}/profile`, method: ApiMethods.GET },
   logout: { path: `${authRoot}/logout`, method: ApiMethods.POST },
   acceptInvitation: {
-    path: `/api/v1/invitation/accept`,
+    path: `/api/v1/system-admin/invitations/accept`,
     method: ApiMethods.POST,
   },
   inviteUser: {
-    path: `/api/v1/invitation`,
+    path: `/api/v1/system-admin/invitations`,
     method: ApiMethods.POST,
   },
   getInvitations: {
-    path: `/api/v1/invitation`,
+    path: `/api/v1/system-admin/invitations`,
     method: ApiMethods.GET,
   },
   getUserPermissions: {
@@ -250,7 +250,7 @@ const authEndpoints = {
   }
 };
 
-const invitationRoot = "/api/v1/invitation";
+const invitationRoot = "/api/v1/system-admin/invitations";
 
 export interface UpdateInvitationRequest {
   firstName?: string;

@@ -4,7 +4,7 @@ import { ApiMethods } from "@/utils/client";
 // ========================
 // Teacher ROOT
 // ========================
-const teacherRoot = "/api/v1/staff";
+const teacherRoot = "/api/v1/system-admin/staff";
 
 // ========================
 // TYPES

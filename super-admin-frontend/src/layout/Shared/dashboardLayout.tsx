@@ -12,7 +12,7 @@ import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 interface DashboardLayoutProps {
   children: ReactNode;
-  role: "admin" | "staff" | "parent";
+  role: "systemAdmin";
   hideSidebarContent?: boolean;
   showNotifications?: boolean;
 }

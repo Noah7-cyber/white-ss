@@ -3,18 +3,13 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { DashboardRoutes } from "@/routes/dashboard.routes";
-import { StaffRoutes } from "@/routes/staff.routes";
-import { ParentRoutes } from "@/routes/parent.routes";
 import {
   getToken,
   getUserRoleFromCookie,
-  getSchoolFromCookie,
   isOnAuthDomain,
   redirectToAuthRoute,
 } from "@/utils/helper";
 import { AuthRoutes } from "@/routes/auth.routes";
-import SelectLoginRole from "@/modules/admin/page/SelectLoginRole/selectLoginRole";
-import AuthLayout from "./auth/layout";
 
 export default function HomePage() {
   const router = useRouter();
@@ -33,17 +28,8 @@ export default function HomePage() {
       try {
         const userRole = getEffectiveRole();
         if (userRole) {
-          if (userRole === "admin") {
+          if (userRole === "systemAdmin" || userRole === "systemadmin") {
             router.replace(DashboardRoutes.dashboard);
-          } else if (userRole === "staff") {
-            router.replace(StaffRoutes.dashboard);
-          } else if (userRole === "parent") {
-            const school = getSchoolFromCookie();
-            if (school?.id != null && school?.subDomain) {
-              router.replace(ParentRoutes.dashboard);
-            } else {
-              router.replace(AuthRoutes.parentGetStarted);
-            }
           } else {
             router.replace("/dashboard");
           }
@@ -54,14 +40,10 @@ export default function HomePage() {
       return;
     }
     if (!isOnAuthDomain()) {
-      if (redirectToAuthRoute(AuthRoutes.selectRole)) return;
+      if (redirectToAuthRoute(AuthRoutes.login)) return;
     }
-    router.replace(AuthRoutes.selectRole);
+    router.replace(AuthRoutes.login);
   }, [router]);
 
-  return (
-    <AuthLayout>
-      <SelectLoginRole />
-    </AuthLayout>
-  );
+  return null;
 }

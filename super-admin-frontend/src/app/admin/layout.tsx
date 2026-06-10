@@ -13,19 +13,12 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { canAccessPath, isLoading: isPermissionLoading } = usePermissionGuide();
-  const isTourPreview = pathname?.includes("/admin/admission/tours/create/preview");
   const canViewCurrentPath = canAccessPath(pathname);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    runRoleGuard("admin", router.replace);
+    runRoleGuard("systemAdmin", router.replace);
   }, [router]);
-
-
-
-  if (isTourPreview) {
-    return <>{children}</>;
-  }
 
   // Show loading while checking authentication
   if (status === "loading" || isPermissionLoading || typeof window === "undefined") {
@@ -37,17 +30,17 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
       const accessToken = hasAccessToken();
       const userRole = getEffectiveRole();
 
-      if (accessToken && userRole === "admin") {
+      if (accessToken && userRole === "systemAdmin") {
         if (!canViewCurrentPath) {
           return (
-            <DashboardLayout role={userRole as "admin" | "staff" | "parent"}>
+            <DashboardLayout role="systemAdmin">
               <NoAccess />
             </DashboardLayout>
           );
         }
 
         return (
-          <DashboardLayout role={userRole as "admin" | "staff" | "parent"}>
+          <DashboardLayout role="systemAdmin">
             {children}
           </DashboardLayout>
         );

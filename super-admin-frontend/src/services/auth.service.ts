@@ -231,7 +231,7 @@ const authEndpoints = {
     method: ApiMethods.POST,
   },
   userProfile: { path: `${authRoot}/profile`, method: ApiMethods.GET },
-  logout: { path: `${authRoot}/logout`, method: ApiMethods.POST },
+  logout: { path: `/api/v1/auth/logout`, method: ApiMethods.POST },
   acceptInvitation: {
     path: `/api/v1/system-admin/invitations/accept`,
     method: ApiMethods.POST,

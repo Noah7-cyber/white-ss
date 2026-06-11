@@ -434,6 +434,8 @@ export const adminSidebarItems: SidebarItemProps[] = [
   },
 ];
 
+export const systemAdminSidebarItems: SidebarItemProps[] = adminSidebarItems;
+
 export const staffSidebarItems: SidebarItemProps[] = [
   {
     id: 1,

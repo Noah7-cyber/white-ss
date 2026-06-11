@@ -311,6 +311,12 @@ export const adminSidebarItems: SidebarItemProps[] = [
     path: DashboardRoutes.dashboard,
   },
   {
+    id: "schools",
+    label: "Schools",
+    icon: <ClassroomIcon />, // Using an existing icon for now
+    path: DashboardRoutes.schools,
+  },
+  {
     id: 2,
     label: "Children",
     icon: (

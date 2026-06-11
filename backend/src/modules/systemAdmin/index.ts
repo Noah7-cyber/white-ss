@@ -1,5 +1,4 @@
 export { systemAdminAuthRoutes } from "./auth/routes/system-admin-auth.routes";
-<<<<<<< HEAD
 export { systemAdminAuthController, SystemAdminAuthController } from "./auth/controllers/system-admin-auth.controller";
 export { systemAdminAuthService, SystemAdminAuthService } from "./auth/services/system-admin-auth.service";
 export { SYSTEM_ADMIN_AUTH_MESSAGES } from "./auth/constants/messages";
@@ -16,8 +15,6 @@ export {
 export { SYSTEM_ADMIN_INVITATION_MESSAGES } from "./invitation/constants/messages";
 export { SystemAdminInvitation } from "./invitation/entities/SystemAdminInvitation";
 
-<<<<<<< HEAD
-=======
 export { systemAdminAdminRoutes } from "./admin/routes/system-admin-admin.routes";
 export {
   systemAdminAdminController,
@@ -28,51 +25,55 @@ export {
   SystemAdminAdminService,
 } from "./admin/services/system-admin-admin.service";
 export { SYSTEM_ADMIN_ADMIN_MESSAGES } from "./admin/constants/messages";
->>>>>>> 17bdd28d48b5054432e7a824e6a4e021d088042b
-=======
-
-export { systemAdminAuthController, SystemAdminAuthController } from "./auth/controllers/system-admin-auth.controller";
-
-export { systemAdminAuthService, SystemAdminAuthService } from "./auth/services/system-admin-auth.service";
-
-export { SYSTEM_ADMIN_AUTH_MESSAGES } from "./auth/constants/messages";
-
-
-
-export { systemAdminInvitationRoutes } from "./invitation/routes/system-admin-invitation.routes";
-
-export {
-
-  systemAdminInvitationController,
-
-  SystemAdminInvitationController,
-
-} from "./invitation/controllers/system-admin-invitation.controller";
-
-export {
-
-  systemAdminInvitationService,
-
-  SystemAdminInvitationService,
-
-} from "./invitation/services/system-admin-invitation.service";
-
-export { SYSTEM_ADMIN_INVITATION_MESSAGES } from "./invitation/constants/messages";
-
-export { SystemAdminInvitation } from "./invitation/entities/SystemAdminInvitation";
 
 export { systemAdminClassroomRoutes } from "./classroom/routes/system-admin-classroom.routes";
-
 export {
   systemAdminClassroomController,
   SystemAdminClassroomController,
 } from "./classroom/controllers/system-admin-classroom.controller";
-
 export {
   systemAdminClassroomService,
   SystemAdminClassroomService,
 } from "./classroom/services/system-admin-classroom.service";
-
 export { SYSTEM_ADMIN_CLASSROOM_MESSAGES } from "./classroom/constants/messages";
 
->>>>>>> abe1ffeac8e1c58e678e829e6227988a510888d2
+export { systemAdminParentRoutes } from "./parent/routes/system-admin-parent.routes";
+export {
+  systemAdminParentController,
+  SystemAdminParentController,
+} from "./parent/controllers/system-admin-parent.controller";
+export {
+  systemAdminParentService,
+  SystemAdminParentService,
+} from "./parent/services/system-admin-parent.service";
+
+export { systemAdminStaffRoutes } from "./staff/routes/system-admin-staff.routes";
+export {
+  systemAdminStaffController,
+  SystemAdminStaffController,
+} from "./staff/controllers/system-admin-staff.controller";
+export {
+  systemAdminStaffService,
+  SystemAdminStaffService,
+} from "./staff/services/system-admin-staff.service";
+
+export { systemAdminStudentRoutes } from "./student/routes/system-admin-student.routes";
+export {
+  systemAdminStudentController,
+  SystemAdminStudentController,
+} from "./student/controllers/system-admin-student.controller";
+export {
+  systemAdminStudentService,
+  SystemAdminStudentService,
+} from "./student/services/system-admin-student.service";
+
+export { systemAdminSchoolRoutes } from "./school/routes/system-admin-school.routes";
+export {
+  systemAdminSchoolController,
+  SystemAdminSchoolController,
+} from "./school/controllers/system-admin-school.controller";
+export {
+  systemAdminSchoolService,
+  SystemAdminSchoolService,
+} from "./school/services/system-admin-school.service";
+export { SYSTEM_ADMIN_SCHOOL_MESSAGES } from "./school/constants/messages";

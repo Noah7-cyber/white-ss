@@ -448,6 +448,14 @@ const useTeachersPage = () => {
     handleSearch,
     selectedTeacherStatus,
     canCreateTeacher: hasPermission("staff", "create"),
+    handleExport: async () => {
+      try {
+        console.log("Export triggered for teachers with filters", filters);
+      } catch (error) {
+        console.error("Export error", error);
+      }
+    },
+    isExporting: false,
   };
 };
 

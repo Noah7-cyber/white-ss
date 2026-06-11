@@ -70,6 +70,15 @@ const useClassroomPage = () => {
     },
   });
 
+  const handleExport = async () => {
+    try {
+      // Stub implementation since there isn't an explicit export endpoint for classrooms yet in this codebase
+      console.log("Export triggered for classrooms with filters", filters);
+    } catch (error) {
+      console.error("Export error", error);
+    }
+  };
+
   const [allClassrooms, setAllClassrooms] = useState<any[]>([]);
 
   const fetchAllClassroomsMetrics = useCallback(async () => {
@@ -349,6 +358,8 @@ const useClassroomPage = () => {
     handleDelete,
     selectedClassroomStatus,
     canCreateClassroom: hasPermission("classroom", "create"),
+    handleExport,
+    isExporting: false,
   };
 };
 

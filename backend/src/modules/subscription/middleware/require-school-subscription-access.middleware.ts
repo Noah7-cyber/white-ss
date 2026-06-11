@@ -9,7 +9,14 @@ const ALLOWLIST_PREFIXES = [
   "/api/v1/auth",
   "/api/v1/system-admin/auth",
   "/api/v1/system-admin/invitations",
+  "/api/v1/system-admin/classrooms",
+  "/api/v1/system-admin/admins",
+<<<<<<< HEAD
+  "/api/v1/system-admin/parents",
   "/api/v1/system-admin/staff",
+=======
+  "/api/v1/system-admin/students",
+>>>>>>> bcbe50df6efd7be1aced5a6fd89937b14aefb668
   "/api/v1/sessions",
   "/api/v1/subscriptions",
   "/api/v1/countries",

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import TeachersPage from "@/modules/admin/page/TeacherPage/TeacherPage";
+import TeachersPage from "@/modules/systemAdmin/page/TeacherPage/TeacherPage";
 
 export const metadata: Metadata = {
   title: "Teachers",

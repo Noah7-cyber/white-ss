@@ -5,7 +5,7 @@ import { School } from "./teacher.service";
 // ========================
 // Classroom ROOT
 // ========================
-const classroomRoot = "/api/v1/classroom";
+const classroomRoot = "/api/v1/system-admin/classrooms";
 
 // ========================
 // TYPES

@@ -330,6 +330,12 @@ export const adminSidebarItems: SidebarItemProps[] = [
     icon: <TeacherIcon />,
     path: DashboardRoutes.teachers,
   },
+  {
+    id: 41,
+    label: "System Admins",
+    icon: <Image src="/assets/svg/mage_users.svg" alt="parent-logo" width={20} height={20} />,
+    path: DashboardRoutes.admins,
+  },
 
   {
     id: 5,
@@ -1142,6 +1148,10 @@ export const SETTINGS_ROUTES_OPTIONS = [
   {
     label: "Payment Methods",
     href: DashboardRoutes.paymentMethodSetting,
+  },
+  {
+    label: "System Admins",
+    href: DashboardRoutes.systemAdminsSettings,
   },
 ];
 

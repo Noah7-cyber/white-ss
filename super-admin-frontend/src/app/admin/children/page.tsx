@@ -1,4 +1,4 @@
-import { ChildrenPage } from "@/modules/admin/page/Children";
+import { ChildrenPage } from "@/modules/systemAdmin/page/Children/childrenPage";
 import React from "react";
 import { Metadata } from "next";
 

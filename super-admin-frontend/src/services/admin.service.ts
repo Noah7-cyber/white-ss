@@ -1,6 +1,6 @@
 import { ApiMethods } from "@/utils/client";
 
-const adminRoot = "/api/v1/admins";
+const adminRoot = "/api/v1/system-admin/admins";
 
 export interface UpdateAdminPinRequest {
   pin: string;

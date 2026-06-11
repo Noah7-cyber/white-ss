@@ -1,4 +1,4 @@
-import ClassroomPage from "@/modules/admin/page/ClassroomPage/ClassroomPage";
+import ClassroomPage from "@/modules/systemAdmin/page/ClassroomPage/ClassroomPage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

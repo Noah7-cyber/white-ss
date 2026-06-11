@@ -19,7 +19,13 @@ import PlusIcon from "@/modules/shared/assets/svgs/plus-icon.svg";
 import { MobileFilterDrawer } from "@/modules/shared/component/MobileFilterDrawer/MobileFilterDrawer";
 import { useState, useEffect } from "react";
 import { MobileClassroomCard, MobileClassroomCardSkeleton } from "./MobileClassroomCard";
+import { CWDropdown } from "@/modules/shared/component/FormFields/CWDropdown";
+import { useSystemAdminSchools } from "@/utils/hooks/useSystemAdminSchools";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import CircularProgress from "@mui/material/CircularProgress";
+
 export default function ClassroomPage() {
+  const { schoolOptions } = useSystemAdminSchools();
   const router = useRouter();
   const {
     pagination,
@@ -43,9 +49,12 @@ export default function ClassroomPage() {
     mobileClassroomData,
     selectedClassroomStatus,
     canCreateClassroom,
+    handleExport,
+    isExporting,
   } = useClassroomPage();
 
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>("");
 
   useEffect(() => {
     const handleOpen = () => setMobileFilterOpen(true);
@@ -82,8 +91,8 @@ export default function ClassroomPage() {
           className="!h-20 md:h-35 !min-w-52 md:min-w-0 border! border-[#00808033]! rounded-lg!"
         />
       </div>
-      <Box className="w-full flex items-center justify-between gap-4">
-        <div className="w-full lg:w-full max-w-md">
+      <Box className="w-full flex items-center justify-between gap-4 flex-wrap">
+        <div className="w-full lg:w-auto max-w-md flex-1">
           <SearchTextfield
             onChange={handleSearch}
             placeholder="Search by class name, etc"
@@ -98,18 +107,51 @@ export default function ClassroomPage() {
             // }
             isRounded={true}
             fullWidth={true}
-            className="max-w-full "
+            className="max-w-full"
             inputClasses="max-w-full !bg-white"
           />
         </div>
-        <Button
-          className="rounded-lg! !hidden md:!flex"
-          startIcon={<PlusIcon />}
-          onClick={() => router.push("/admin/rooms/classes/add")}
-          disabled={!canCreateClassroom}
-        >
-          Add Classroom
-        </Button>
+
+        <Box className="flex gap-3 w-full lg:w-auto overflow-x-auto hide-scrollbar">
+          <Box className="w-48 shrink-0">
+            <CWDropdown
+              options={schoolOptions.map((o) => ({ name: o.label, value: o.value }))}
+              value={selectedSchoolId}
+              onSelect={(val) => {
+                setSelectedSchoolId(val as string);
+                applyFilters({ schoolId: val ? Number(val) : undefined });
+              }}
+              textFieldProps={{
+                placeholder: "All Schools",
+                isRounded: true,
+                inputClasses: "!bg-white"
+              }}
+            />
+          </Box>
+          <Button
+            className="rounded-lg! !bg-white !text-[#02273A] !border !border-gray-200 shrink-0"
+            onClick={handleExport}
+            disabled={isExporting}
+            startIcon={
+              isExporting ? (
+                <CircularProgress size={14} className="!text-[#02273A]" />
+              ) : (
+                <FileDownloadOutlinedIcon sx={{ fontSize: 18 }} />
+              )
+            }
+          >
+            Export
+          </Button>
+          <Button
+            className="rounded-lg! !hidden md:!flex shrink-0"
+            startIcon={<PlusIcon />}
+            onClick={() => router.push("/admin/rooms/classes/add")}
+            disabled={true}
+            title="Read-Only Access"
+          >
+            Add Classroom
+          </Button>
+        </Box>
       </Box>
 
       <div className="md:hidden flex flex-col gap-3">

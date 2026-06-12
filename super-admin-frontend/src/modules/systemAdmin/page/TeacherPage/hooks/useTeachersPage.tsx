@@ -7,8 +7,7 @@ import { useRouter } from "next/navigation";
 import TeacherRowActions from "@/modules/admin/component/TeacherRowActions/teacherRowActions";
 import { DashboardRoutes } from "@/routes/dashboard.routes";
 
-import { showToast } from "@/modules/shared/component/Toast";
-import { systemAdminTeacherDynamicEndpoints as teacherDynamicEndpoints, systemAdminTeacherServices as teacherServices } from "@/services/system-admin-teacher.service";
+import { systemAdminTeacherServices as teacherServices } from "@/services/system-admin-teacher.service";
 import { ITEMS_PER_PAGE } from "@/constants";
 import Box from "@mui/material/Box";
 import { useMutationService } from "@/utils/hooks/useMutationService";
@@ -76,22 +75,6 @@ const useTeachersPage = () => {
   const getStatusConfig = (status: string) =>
     STATUS_CONSTANT[status?.toLowerCase()] ?? { chip: "bg-gray-100 text-gray-700" };
 
-  const { mutateAsync: deactivateTeacherAsync, isPending: isDeactivatingTeacher } =
-    useMutationService({
-      service: teacherDynamicEndpoints.changeTeacherStatus(selectedTeacherIdx!),
-      options: {
-        disableToast: true,
-      }, // /staff/:id  DELETE
-    });
-  const { mutateAsync: deleteTeacherAsync, isPending: isDeletingTeacher } = useMutationService({
-    service: teacherDynamicEndpoints.deleteTeacher(selectedTeacherIdx!), // /staff/:id  DELETE
-  });
-  const { mutateAsync: resendTeacherInviteAsync } = useMutationService<{ id: number }>({
-    service: (variables) => teacherDynamicEndpoints.resendTeacherInvite(variables.id),
-    options: {
-      disableToast: true,
-    },
-  });
 
   /** ---- METRICS SOURCE: FETCH ALL TEACHERS (no pagination, for cards) ---- */
   const { mutateAsync: getAllTeachers } = useMutationService({
@@ -167,38 +150,6 @@ const useTeachersPage = () => {
     fetchAllTeachersMetrics();
   }, [fetchAllTeachersMetrics]);
 
-  const handleDeactivate = async () => {
-    if (!selectedTeacherIdx) return;
-    if (!ensurePermission("staff", "update")) return;
-    const normalizedStatus = String(selectedTeacherStatus || "").toLowerCase();
-    const nextStatus = normalizedStatus === "active" ? "suspended" : "active";
-
-    try {
-      await deactivateTeacherAsync({ status: nextStatus });
-
-      showToast({
-        message: nextStatus === "active" ? "Teacher Activated" : "Teacher Deactivated",
-        description:
-          nextStatus === "active"
-            ? "The teacher has been successfully activated."
-            : "The teacher has been successfully suspended.",
-        severity: "success",
-        duration: 3000,
-      });
-
-      setDeactivateModalOpen(false);
-
-      refetch();
-      fetchAllTeachersMetrics();
-    } catch (error: any) {
-      showToast({
-        message: "Error",
-        description: error?.response?.data?.message || "Unable to deactivate teacher.",
-        severity: "error",
-        duration: 3000,
-      });
-    }
-  };
 
   const renderRowActions = (teacherId: number, teacherStatus?: string) => (
     <TeacherRowActions
@@ -216,33 +167,6 @@ const useTeachersPage = () => {
     />
   );
 
-  const handleDelete = async () => {
-    if (!selectedTeacherIdx) return;
-    if (!ensurePermission("staff", "delete")) return;
-
-    try {
-      await deleteTeacherAsync({});
-
-      showToast({
-        message: "Teacher Deleted",
-        description: "The teacher has been successfully deleted.",
-        severity: "success",
-        duration: 3000,
-      });
-
-      setDeleteModalOpen(false);
-
-      refetch();
-      fetchAllTeachersMetrics();
-    } catch (error: any) {
-      showToast({
-        message: "Error",
-        description: error?.response?.data?.message || "Unable to delete teacher.",
-        severity: "error",
-        duration: 3000,
-      });
-    }
-  };
 
   const StatusCell = ({ status }: { status: string }) => {
     const { chip } = getStatusConfig(status);
@@ -360,12 +284,6 @@ const useTeachersPage = () => {
     router,
     selectedFilter,
     setSelectedFilter,
-    handleDeactivate,
-    handleDelete,
-    deactivateModalOpen,
-    deleteModalOpen,
-    setDeleteModalOpen,
-    setDeactivateModalOpen,
     currentPage,
     filters,
     applyFilters,
@@ -378,11 +296,7 @@ const useTeachersPage = () => {
     TeacherList,
     mobileTeachersData,
     teacherIds: (allTeacherList || []).map((t: any) => t?.id),
-    isDeactivatingTeacher,
-    isDeletingTeacher,
     handleSearch,
-    selectedTeacherStatus,
-    canCreateTeacher: hasPermission("staff", "create"),
   };
 };
 

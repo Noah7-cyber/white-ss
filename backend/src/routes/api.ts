@@ -44,29 +44,14 @@ import { portfolioRoutes } from "../modules/portfolio";
 import { FormRoutes } from "../modules/form";
 import { subscriptionRoutes } from "../modules/subscription";
 import {
-<<<<<<< HEAD
-<<<<<<< HEAD
   systemAdminAuthRoutes,
   systemAdminInvitationRoutes,
-<<<<<<< HEAD
-<<<<<<< HEAD
   systemAdminStaffRoutes,
-=======
   systemAdminParentRoutes,
->>>>>>> 749863aa8d8387a0c0d275f20953d0b98aa56eab
-=======
   systemAdminStudentRoutes,
->>>>>>> bcbe50df6efd7be1aced5a6fd89937b14aefb668
-=======
   systemAdminAdminRoutes,
-  systemAdminAuthRoutes,
-  systemAdminInvitationRoutes,
->>>>>>> 17bdd28d48b5054432e7a824e6a4e021d088042b
-=======
-  systemAdminAuthRoutes,
   systemAdminClassroomRoutes,
-  systemAdminInvitationRoutes,
->>>>>>> abe1ffeac8e1c58e678e829e6227988a510888d2
+  systemAdminSchoolRoutes,
 } from "../modules/systemAdmin";
 
 const router = Router();
@@ -96,23 +81,12 @@ router.use("/notifications", notificationRouter);
 router.use("/auth", authRoutes);
 router.use("/system-admin/auth", systemAdminAuthRoutes);
 router.use("/system-admin/invitations", systemAdminInvitationRoutes);
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 router.use("/system-admin/staff", systemAdminStaffRoutes);
-=======
 router.use("/system-admin/parents", systemAdminParentRoutes);
->>>>>>> 749863aa8d8387a0c0d275f20953d0b98aa56eab
-=======
 router.use("/system-admin/students", systemAdminStudentRoutes);
->>>>>>> bcbe50df6efd7be1aced5a6fd89937b14aefb668
-=======
 router.use("/system-admin/admins", systemAdminAdminRoutes);
->>>>>>> 17bdd28d48b5054432e7a824e6a4e021d088042b
-=======
 router.use("/system-admin/classrooms", systemAdminClassroomRoutes);
->>>>>>> abe1ffeac8e1c58e678e829e6227988a510888d2
+router.use("/system-admin/schools", systemAdminSchoolRoutes);
 router.use("/roles", rolesRoutes);
 router.use("/users", userStatsRoutes);
 router.use("/profile", ProfileRoutes);

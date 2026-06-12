@@ -5,7 +5,7 @@ import { downloadFile } from "@/utils/file-download";
 // ========================
 // CHILD ROOT
 // ========================
-const childRoot = "/api/v1/students";
+const childRoot = "/api/v1/system-admin/students";
 
 // ========================
 // TYPES

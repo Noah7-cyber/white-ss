@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Parents } from "@/modules/admin/page/Parents";
+import { Parents } from "@/modules/systemAdmin/page/Parents/Parents";
 
 export const metadata: Metadata = {
   title: "Parents",

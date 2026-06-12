@@ -3,9 +3,9 @@ import { ApiMethods } from "@/utils/client";
 import { downloadFile } from "@/utils/file-download";
 
 // ========================
-// CHILD ROOT
+// PARENT ROOT
 // ========================
-const parentRoot = "/api/v1/parents";
+const parentRoot = "/api/v1/system-admin/parents";
 
 // ---- Kiosk PIN Verify ----
 export interface KioskVerifyRequest {

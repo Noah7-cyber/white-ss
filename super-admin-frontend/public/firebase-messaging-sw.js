@@ -3,15 +3,7 @@
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js");
 
-const firebaseConfig = {
-  "apiKey": "AIzaSyBByPSo4yrC_7qpVA_dDs8oJJtfnt1n9pM",
-  "authDomain": "heimdall-projects.firebaseapp.com",
-  "projectId": "heimdall-projects",
-  "storageBucket": "heimdall-projects.firebasestorage.app",
-  "messagingSenderId": "978325430492",
-  "appId": "1:978325430492:web:037321ae9f414c925c1419",
-  "measurementId": "G-3P7N3J6Y0W"
-};
+const firebaseConfig = {};
 
 try {
   firebase.initializeApp(firebaseConfig);

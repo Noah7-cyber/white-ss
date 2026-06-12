@@ -11,6 +11,7 @@ import {
   parentSidebarItems,
   SidebarItemProps,
   adminSidebarItems,
+  systemAdminSidebarItems,
 } from "@/constants";
 
 import { authServices } from "@/services/auth.service";
@@ -194,11 +195,13 @@ const useSidebar = ({ role: roleProp }: SidebarProps) => {
 
   const roleBasedItems = useMemo(() => {
     const items =
-      role === "admin"
+      roleProp === "systemAdmin"
+        ? systemAdminSidebarItems
+        : role === "admin"
         ? adminSidebarItems
         : role === "staff"
-          ? staffSidebarItems
-          : parentSidebarItems;
+        ? staffSidebarItems
+        : parentSidebarItems;
 
     if (role !== "admin" || isPermissionLoading) {
       return items;

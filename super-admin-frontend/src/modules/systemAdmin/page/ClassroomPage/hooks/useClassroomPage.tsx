@@ -116,69 +116,25 @@ const useClassroomPage = () => {
     fetchAllClassroomsMetrics();
   }, [fetchAllClassroomsMetrics]);
 
-  /** ---- DELETE ---- */
-  const { mutateAsync: deleteClassroomAsync } = useMutationService({
-    service: classroomDynamicEndpoints.deleteClassroom(selectedClassroomIdx!),
-  });
-
-  const { mutateAsync: changeClassroomStatusAsync } = useMutationService({
-    service: classroomDynamicEndpoints.changeClassroomStatus(selectedClassroomIdx!),
-  });
-
   const handleDelete = async () => {
-    if (!selectedClassroomIdx) return;
-    if (!ensurePermission("classroom", "delete")) return;
-
-    try {
-      await deleteClassroomAsync({});
-      showToast({
-        message: "Classroom Deleted",
-        description: "The classroom has been successfully deleted.",
-        severity: "success",
-        duration: 3000,
-      });
-      setDeleteModalOpen(false);
-      refetch();
-      fetchAllClassroomsMetrics();
-    } catch (error: any) {
-      showToast({
-        message: "Error",
-        description: error?.response?.data?.message || "Unable to delete classroom.",
-        severity: "error",
-        duration: 3000,
-      });
-    }
+    showToast({
+        message: "Action not permitted",
+        description: "System admin users cannot delete classrooms.",
+        severity: "warning",
+        duration: 3500,
+    });
+    setDeleteModalOpen(false);
   };
 
   /** ---- STATUS TOGGLE ---- */
   const handleDeactivate = async () => {
-    if (!selectedClassroomIdx) return;
-    if (!ensurePermission("classroom", "update")) return;
-
-    try {
-      const nextStatus = selectedClassroomStatus === "inactive" ? "active" : "inactive";
-      await changeClassroomStatusAsync({ status: nextStatus, classroomStatus: nextStatus });
-      showToast({
-        message:
-          nextStatus === "active" ? "Classroom Activated" : "Classroom Deactivated",
-        description:
-          nextStatus === "active"
-            ? "The classroom has been successfully activated."
-            : "The classroom has been successfully deactivated.",
-        severity: "success",
-        duration: 3000,
-      });
-      setDeactivateModalOpen(false);
-      refetch();
-      fetchAllClassroomsMetrics();
-    } catch (error: any) {
-      showToast({
-        message: "Error",
-        description: error?.response?.data?.message || "Unable to deactivate classroom.",
-        severity: "error",
-        duration: 3000,
-      });
-    }
+    showToast({
+        message: "Action not permitted",
+        description: "System admin users cannot update classrooms.",
+        severity: "warning",
+        duration: 3500,
+    });
+    setDeactivateModalOpen(false);
   };
 
   /** ---- ROW ACTIONS ---- */

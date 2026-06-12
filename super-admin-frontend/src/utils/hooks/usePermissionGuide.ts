@@ -129,6 +129,8 @@ export function usePermissionGuide(options?: UsePermissionGuideOptions) {
     },
   });
 
+  const isSystemAdmin = user?.role === "systemAdmin" || user?.role === "system_admin";
+
   const effectivePermissions = useMemo<EffectivePermissionsMap>(
     () => permissionsData?.effectivePermissions ?? {},
     [permissionsData?.effectivePermissions],
@@ -136,6 +138,7 @@ export function usePermissionGuide(options?: UsePermissionGuideOptions) {
 
   const hasPermission = useMemo(
     () => (resource?: string | null, action: PermissionAction = "view") => {
+      if (isSystemAdmin) return true;
       if (!resource) return true;
 
       const resourcePermissions = effectivePermissions?.[resource];
@@ -143,17 +146,18 @@ export function usePermissionGuide(options?: UsePermissionGuideOptions) {
 
       return Boolean(resourcePermissions[action]);
     },
-    [effectivePermissions],
+    [effectivePermissions, isSystemAdmin],
   );
 
   const canAccessPath = useMemo(
     () => (pathname?: string | null, actionOverride?: PermissionAction) => {
+      if (isSystemAdmin) return true;
       const requirement = getAdminPermissionRequirement(pathname, actionOverride);
       if (!requirement) return true;
 
       return hasPermission(requirement.resource, requirement.action);
     },
-    [hasPermission],
+    [hasPermission, isSystemAdmin],
   );
 
   const ensurePermission = useMemo<EnsurePermission>(
@@ -163,6 +167,8 @@ export function usePermissionGuide(options?: UsePermissionGuideOptions) {
         actionArg?: PermissionAction,
         messageArg?: string,
       ) => {
+        if (isSystemAdmin) return true;
+
         const { resource = "account", action, message } =
           typeof resourceOrOptions === "string"
             ? {
@@ -190,7 +196,7 @@ export function usePermissionGuide(options?: UsePermissionGuideOptions) {
         });
         return false;
       },
-    [hasPermission, isLoading],
+    [hasPermission, isLoading, isSystemAdmin],
   );
 
   const firstAccessibleAdminPath = useMemo(

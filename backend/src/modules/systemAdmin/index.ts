@@ -55,3 +55,6 @@ export { SYSTEM_ADMIN_STUDENT_MESSAGES } from "./student/constants/messages";
 export { systemAdminSchoolRoutes } from "./school/routes/system-admin-school.routes";
 export { systemAdminSchoolController, SystemAdminSchoolController } from "./school/controllers/system-admin-school.controller";
 export { systemAdminSchoolService, SystemAdminSchoolService } from "./school/services/system-admin-school.service";
+export { systemAdminAnalyticsRoutes } from "./analytics/routes/system-admin-analytics.routes";
+export { systemAdminAnalyticsController, SystemAdminAnalyticsController } from "./analytics/controllers/system-admin-analytics.controller";
+export { systemAdminAnalyticsService, SystemAdminAnalyticsService } from "./analytics/services/system-admin-analytics.service";

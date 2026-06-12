@@ -23,6 +23,7 @@ import { CashViewer } from "@/modules/shared/component/CashViewer";
 import { activitiesServices } from "@/services/activities.service";
 import { unwrapQueryDataBody } from "@/utils/unwrapQueryResponse";
 import type { ActionCentreItem } from "@/modules/admin/component/ActionCentreTable/actionCentreTable";
+import { systemAdminAnalyticsServices, SystemAdminDashboardAnalyticsResponse } from "@/services/system-admin-analytics.service";
 
 const DEFAULT_PERIOD_NAME = "This week";
 
@@ -64,6 +65,22 @@ export default function useAdminDashboard({ role }: { role: string }) {
     [startDate, endDate, attendancePeriodType, selectedClassroomId],
   );
 
+  const isSystemAdmin = role === "systemAdmin";
+
+  const { data: systemAdminAnalyticsData, isLoading: isSystemAdminAnalyticsLoading } = useQueryService<
+    SystemAdminDashboardAnalyticsResponse,
+    any
+  >({
+    service: systemAdminAnalyticsServices.getDashboardAnalytics,
+    options: {
+      keys: ["systemAdminDashboardAnalytics"],
+      staleTime: 2 * 60 * 1000,
+      refetchInterval: false,
+      refetchOnWindowFocus: false,
+      enabled: isSystemAdmin,
+    },
+  });
+
   const { data: schoolData, isLoading: isSchoolLoading } = useQueryService<GetSchoolResponse, any>({
     service: schoolDynamicEndpoints.getParticularSchool(),
     options: {
@@ -71,6 +88,7 @@ export default function useAdminDashboard({ role }: { role: string }) {
       staleTime: 2 * 60 * 1000,
       refetchInterval: false,
       refetchOnWindowFocus: false,
+      enabled: !isSystemAdmin,
     },
   });
 
@@ -84,6 +102,7 @@ export default function useAdminDashboard({ role }: { role: string }) {
       staleTime: 2 * 60 * 1000,
       refetchInterval: false,
       refetchOnWindowFocus: false,
+      enabled: !isSystemAdmin,
     },
   });
 
@@ -101,6 +120,7 @@ export default function useAdminDashboard({ role }: { role: string }) {
       staleTime: 2 * 60 * 1000,
       refetchInterval: false,
       refetchOnWindowFocus: false,
+      enabled: !isSystemAdmin,
     },
   });
 
@@ -112,6 +132,9 @@ export default function useAdminDashboard({ role }: { role: string }) {
         status: "active",
       },
     },
+    options: {
+      enabled: !isSystemAdmin,
+    }
   });
 
   const classrooms: Classroom[] = useMemo(
@@ -227,12 +250,22 @@ export default function useAdminDashboard({ role }: { role: string }) {
     },
   ];
 
+  const systemAdminCards = [
+    { title: "Total Schools", value: systemAdminAnalyticsData?.data?.totalSchools ?? 0, figure: Math.round(0) },
+    { title: "Total Students", value: systemAdminAnalyticsData?.data?.totalStudents ?? 0, figure: Math.round(0) },
+    { title: "Total Teachers", value: systemAdminAnalyticsData?.data?.totalTeachers ?? 0, figure: Math.round(0) },
+    { title: "Total Classrooms", value: systemAdminAnalyticsData?.data?.totalClassrooms ?? 0, figure: Math.round(0) },
+    { title: "Total Parents", value: systemAdminAnalyticsData?.data?.totalParents ?? 0, figure: Math.round(0) },
+  ];
+
   const dashboardCards =
-    role === "admin"
-      ? dynamicAdminCards
-      : role === "staff"
-        ? dashboardStaffDataCards
-        : dashboardParentDataCards;
+    role === "systemAdmin"
+      ? systemAdminCards
+      : role === "admin"
+        ? dynamicAdminCards
+        : role === "staff"
+          ? dashboardStaffDataCards
+          : dashboardParentDataCards;
 
   const reportQuery = useQueryService({
     service: {
@@ -243,6 +276,7 @@ export default function useAdminDashboard({ role }: { role: string }) {
         periodType: attendancePeriodType || "weekly",
       },
     },
+    options: { enabled: !isSystemAdmin }
   });
   const { isLoading: isLoadingReport } = reportQuery;
   const reportData = unwrapQueryDataBody<Record<string, any>>(reportQuery.data);
@@ -256,6 +290,7 @@ export default function useAdminDashboard({ role }: { role: string }) {
     },
     options: {
       keys: ["attendance-hours", startDate, endDate],
+      enabled: !isSystemAdmin
     },
   });
   const billingSummeryData = (unwrapQueryDataBody<Record<string, any>>(billingQuery.data) ??
@@ -275,15 +310,19 @@ export default function useAdminDashboard({ role }: { role: string }) {
 
   const invoiceListQuery = useQueryService({
     service: { ...invoiceServices.getAllInvoice, data: { delta: 1 } },
+    options: { enabled: !isSystemAdmin }
   });
   const invoiceData = (invoiceListQuery.data ?? {}) as Record<string, any>;
 
   useQueryService({
     service: activitiesServices.getAllActivityLogs,
+    options: { enabled: !isSystemAdmin }
   });
 
   useEffect(() => {
     let isMounted = true;
+
+    if (isSystemAdmin) return;
 
     const fetchBookedToursForActionCenter = async () => {
       try {
@@ -319,10 +358,11 @@ export default function useAdminDashboard({ role }: { role: string }) {
     return () => {
       isMounted = false;
     };
-  }, [getBookedTours]);
+  }, [getBookedTours, isSystemAdmin]);
 
   const actionCenterQuery = useQueryService({
     service: analyticsServices.actionCenter,
+    options: { enabled: !isSystemAdmin }
   });
   const { isLoading: isLoadingActionCenterQuery } = actionCenterQuery;
   const actionCenterRaw = unwrapQueryDataBody<unknown[] | Record<string, unknown>>(
@@ -406,7 +446,7 @@ export default function useAdminDashboard({ role }: { role: string }) {
 
   return {
     earningsData,
-    isLoading: isSchoolLoading || isAnalyticsLoading,
+    isLoading: isSystemAdmin ? isSystemAdminAnalyticsLoading : (isSchoolLoading || isAnalyticsLoading),
     isEarningsLoading,
     isAnalyticsLoading,
     schoolData,

@@ -64,7 +64,7 @@ export const AdminHome = ({ role }: { role: string }) => {
           <Box className="hidden md:flex justify-between items-center">
             <Typography className="!text-xl !text-text-primary !font-semibold">System Dashboard</Typography>
           </Box>
-          <Box className="flex gap-4 overflow-x-auto lg:overflow-x-visible hide-scrollbar min-h-30 *:shrink-0 lg:*:shrink">
+          <Box className="flex gap-4 overflow-x-auto lg:overflow-x-visible hide-scrollbar min-h-30 *:shrink-0 lg:*:shrink flex-wrap">
             {dashboardCards?.map(
               (
                 {
@@ -82,64 +82,21 @@ export const AdminHome = ({ role }: { role: string }) => {
                 },
                 index: number,
               ) => (
-                <DashboardDataCard
-                  title={title}
-                  value={value}
-                  percentage={percentage}
-                  key={index}
-                  isLoading={isLoading}
-                  isDashboard
-                  figure={figure}
-                  activityText={activityText || "this month"}
-                />
+                <Box key={index} className="flex-grow w-full md:w-[calc(33.33%-1rem)] lg:w-[calc(20%-1rem)] min-w-[200px]">
+                  <DashboardDataCard
+                    title={title}
+                    value={value}
+                    percentage={percentage}
+                    isLoading={isLoading}
+                    isDashboard
+                    figure={figure}
+                    activityText={activityText || "this month"}
+                  />
+                </Box>
               ),
             )}
           </Box>
 
-          <ActionCentreTable items={actionCenter} isLoading={isLoadingActionCenter} />
-
-          {/* ── Section 2: Students donut + Attendance chart | Insights + Activity ── */}
-          <Box className="flex flex-col lg:flex-row gap-4">
-            <Box className="flex flex-col gap-4 w-full lg:w-[45%]">
-              <ClassStatsChart
-                className="w-full"
-                data={classStatsData}
-                role={"admin"}
-                isLoading={isLoading}
-              />
-              <AttendanceInsights
-                isLoading={isLoadingReport}
-                bestDay={reportData?.attendanceInsight?.bestDay?.dayName}
-                bestDayPercent={reportData?.attendanceInsight?.bestDay?.ratePercent}
-                worstDay={reportData?.attendanceInsight?.worstDay?.dayName}
-                worstDayPercent={reportData?.attendanceInsight?.worstDay?.ratePercent}
-                weeklyTrendPercent={reportData?.attendanceInsight?.weeklyTrend?.changePercent}
-                weeklyTrendDirection={reportData?.attendanceInsight?.weeklyTrend?.direction}
-              />
-            </Box>
-
-            <Box className="flex flex-col gap-4 w-full lg:w-[55%]">
-              <ClassAttendanceChart
-                className="w-full"
-                startDate={startDate}
-                endDate={endDate}
-                attendancePeriodType={attendancePeriodType}
-                classrooms={classrooms}
-              />{" "}
-              <ImportantActivity />
-            </Box>
-          </Box>
-
-          {/* ── Section 3: Financial Overview ── */}
-          <Box className="flex flex-col gap-4">
-            <FinancialOverviewCards isLoading={isEarningsLoading} items={FINANCIAL_ITEMS} />
-            <EarningsChart
-              data={earningsData}
-              isLoading={isEarningsLoading}
-              periodType={attendancePeriodType}
-              startDate={startDate}
-            />
-          </Box>
         </Box>
       </Box>
     );

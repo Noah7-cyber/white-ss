@@ -52,6 +52,7 @@ import {
   systemAdminAdminRoutes,
   systemAdminClassroomRoutes,
   systemAdminSchoolRoutes,
+  systemAdminAnalyticsRoutes,
 } from "../modules/systemAdmin";
 
 const router = Router();
@@ -87,6 +88,7 @@ router.use("/system-admin/students", systemAdminStudentRoutes);
 router.use("/system-admin/admins", systemAdminAdminRoutes);
 router.use("/system-admin/classrooms", systemAdminClassroomRoutes);
 router.use("/system-admin/schools", systemAdminSchoolRoutes);
+router.use("/system-admin/analytics", systemAdminAnalyticsRoutes);
 router.use("/roles", rolesRoutes);
 router.use("/users", userStatsRoutes);
 router.use("/profile", ProfileRoutes);

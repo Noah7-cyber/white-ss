@@ -10,6 +10,8 @@ import { TextField } from "@/modules/shared/component/TextField";
 
 export const SystemAdminInvitationSettings = () => {
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
   const { mutateAsync: inviteSystemAdmin, isPending } = useMutationService({
     service: authDynamicEndpoints.inviteUser,
@@ -21,17 +23,19 @@ export const SystemAdminInvitationSettings = () => {
   const handleInvite = async () => {
     if (!email) return;
     try {
-      await inviteSystemAdmin({ email });
+      await inviteSystemAdmin({ email, firstName, lastName });
       showToast({
         message: "Invitation Sent",
         description: `Successfully invited ${email} to be a System Admin.`,
         severity: "success",
       });
       setEmail("");
+      setFirstName("");
+      setLastName("");
     } catch (error: { response?: { data?: { message?: string } } }) {
       showToast({
         message: "Failed to send invitation",
-        description: error?.response?.data?.message || "An error occurred",
+        description: error?.response?.data?.errors?.join(", ") || error?.response?.data?.message || "An error occurred",
         severity: "error",
       });
     }
@@ -47,23 +51,43 @@ export const SystemAdminInvitationSettings = () => {
         Send an invitation email to add a new system administrator. They will have full access across all schools.
       </Typography>
 
-      <Box className="flex gap-4 items-end">
-        <Box className="flex-1">
-          <TextField
-            label="Email Address"
-            placeholder="Enter email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-          />
+      <Box className="flex flex-col gap-4">
+        <Box className="flex gap-4">
+          <Box className="flex-1">
+            <TextField
+              label="First Name"
+              placeholder="Enter first name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </Box>
+          <Box className="flex-1">
+            <TextField
+              label="Last Name"
+              placeholder="Enter last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </Box>
         </Box>
-        <Button
-          onClick={handleInvite}
-          disabled={!email || isPending}
-          className="h-12 !px-8"
-        >
-          {isPending ? "Sending..." : "Send Invite"}
-        </Button>
+        <Box className="flex gap-4 items-end">
+          <Box className="flex-1">
+            <TextField
+              label="Email Address"
+              placeholder="Enter email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+            />
+          </Box>
+          <Button
+            onClick={handleInvite}
+            disabled={!email || !firstName || !lastName || isPending}
+            className="h-12 !px-8"
+          >
+            {isPending ? "Sending..." : "Send Invite"}
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

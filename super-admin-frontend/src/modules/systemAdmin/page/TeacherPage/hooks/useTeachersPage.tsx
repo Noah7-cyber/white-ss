@@ -13,7 +13,7 @@ import Box from "@mui/material/Box";
 import { useMutationService } from "@/utils/hooks/useMutationService";
 import { useQueryService } from "@/utils/hooks/useQueryService";
 import { useFilter } from "@/utils/hooks/useFilter";
-import { classroomServices } from "@/services/classroom.service";
+import { systemAdminClassroomServices as classroomServices } from "@/services/system-admin-classroom.service";
 import { useDebouncer } from "@/utils/hooks/useDebouncer";
 import InitialsAvatar from "@/modules/shared/component/InitialsAvatar/InitialsAvatar";
 import { usePermissionGuide } from "@/utils/hooks/usePermissionGuide";
@@ -27,10 +27,6 @@ const useTeachersPage = () => {
     schoolId: undefined,
   });
   const router = useRouter();
-  const [selectedTeacherIdx, setSelectedTeacherIdx] = useState<number | null>(null);
-  const [selectedTeacherStatus, setSelectedTeacherStatus] = useState<string>("");
-  const [deactivateModalOpen, setDeactivateModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [classrooms, setClassrooms] = useState<any[]>([]);
   const { debouncedSearch, setSearch } = useDebouncer();
   const { hasPermission, ensurePermission } = usePermissionGuide({ enabled: true });

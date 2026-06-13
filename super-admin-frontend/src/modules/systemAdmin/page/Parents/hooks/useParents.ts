@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { systemAdminParentEndpoints as ParentDynamicEndpoints, downloadSystemAdminParentsExport as downloadParentsExport } from "@/services/system-admin-parent.service";
-import { classroomServices } from "@/services/classroom.service";
+import { systemAdminClassroomServices as classroomServices } from "@/services/system-admin-classroom.service";
 import { useQueryService } from "@/utils/hooks/useQueryService";
 import { unwrapQueryDataBody } from "@/utils/unwrapQueryResponse";
 import { useInfiniteQueryService } from "@/utils/hooks/useInfiniteQueryService";

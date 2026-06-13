@@ -2,11 +2,9 @@
 
 import { systemAdminParentEndpoints as ParentDynamicEndpoints, downloadSystemAdminParentsExport as downloadParentsExport } from "@/services/system-admin-parent.service";
 import { classroomServices } from "@/services/classroom.service";
-import { useMutationService } from "@/utils/hooks/useMutationService";
 import { useQueryService } from "@/utils/hooks/useQueryService";
 import { unwrapQueryDataBody } from "@/utils/unwrapQueryResponse";
 import { useInfiniteQueryService } from "@/utils/hooks/useInfiniteQueryService";
-import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState, useCallback, ChangeEvent } from "react";
 import { ITEMS_PER_PAGE } from "@/constants";
 import { useFilter } from "@/utils/hooks/useFilter";
@@ -18,14 +16,11 @@ const ALL_CLASSROOMS_VALUE = "";
 const ALL_STATUS_VALUE = "all";
 
 export function useParents() {
-  const queryClient = useQueryClient();
   const [classRoomAnchorEl, setClassRoomAnchorEl] = useState<HTMLElement | null>(null);
   const [statusAnchorEl, setStatusAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedClassRoomFilter, setSelectedClassRoomFilter] =
     useState<string>(ALL_CLASSROOMS_VALUE);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>(ALL_STATUS_VALUE);
-  const [deleteAccount, setDeleteAccount] = useState<any>(null);
-  const [statusAccount, setStatusAccount] = useState<any>(null);
   const { debouncedSearch, setSearch } = useDebouncer();
   const { hasPermission, ensurePermission } = usePermissionGuide({ enabled: true });
 
@@ -140,88 +135,13 @@ export function useParents() {
     },
   });
 
-  const { isLoading, refetch } = parentsQuery;
+  const { isLoading } = parentsQuery;
   const parentData = unwrapQueryDataBody<Record<string, any>>(parentsQuery.data);
 
   const metadata = parentData?.metadata;
   const pagination = parentData?.pagination;
   const parentsList = parentData?.parents ?? [];
 
-  const { mutateAsync, isPending } = useMutationService({
-    service: ParentDynamicEndpoints.deleteParent(deleteAccount?.id),
-  });
-  const { mutateAsync: changeParentStatusAsync, isPending: isStatusPending } = useMutationService({
-    service: ParentDynamicEndpoints.changeParentStatus(statusAccount?.id),
-    options: {
-      disableToast: true,
-    },
-  });
-  const { mutateAsync: resendParentInviteAsync, isPending: isResendInvitePending } = useMutationService({
-    service: ParentDynamicEndpoints.resendInvite(),
-  });
-
-  async function handleDelete() {
-    if (!ensurePermission("parent", "delete")) return;
-    if ((deleteAccount?.childrenCount ?? 0) > 0) {
-      showToast({
-        message: "Cannot delete parent",
-        description: "This parent is linked to at least one child. Reassign guardianship first.",
-        severity: "warning",
-        duration: 3500,
-      });
-      setDeleteAccount(null);
-      return;
-    }
-    try {
-      await mutateAsync({});
-      setDeleteAccount(null);
-      refetch();
-      // Invalidate child-by-id queries so child edit page no longer shows the deleted parent
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey[0];
-          return (
-            key != null &&
-            typeof key === "object" &&
-            "path" in key &&
-            String((key as { path?: string }).path ?? "").includes("/students/")
-          );
-        },
-      });
-    } catch {
-      // Error handled by mutation options / toast
-    }
-  }
-
-  async function handleToggleStatus() {
-    if (!statusAccount?.id) return;
-    if (!ensurePermission("parent", "update")) return;
-    const currentStatus = String(statusAccount?.status || "").toLowerCase();
-    const nextStatus =
-      currentStatus === "active" ? "inactive" : currentStatus === "inactive" ? "active" : "active";
-
-    try {
-      await changeParentStatusAsync({ status: nextStatus });
-      showToast({
-        message: nextStatus === "active" ? "Parent Activated" : "Parent Deactivated",
-        description:
-          nextStatus === "active"
-            ? "The parent has been successfully activated."
-            : "The parent has been successfully deactivated.",
-        severity: "success",
-        duration: 3000,
-      });
-      setStatusAccount(null);
-      refetch();
-    } catch (error: any) {
-      showToast({
-        message: "Error",
-        description: error?.response?.data?.message || "Unable to update parent status.",
-        severity: "error",
-        duration: 3000,
-      });
-    }
-  }
 
   const [isExporting, setIsExporting] = useState(false);
 
@@ -253,27 +173,6 @@ export function useParents() {
       });
     } finally {
       setIsExporting(false);
-    }
-  }
-
-  async function handleResendInvite(parentId: number) {
-    if (!parentId) return;
-    if (!ensurePermission("parent", "create")) return;
-    try {
-      await resendParentInviteAsync({ parentId });
-      showToast({
-        message: "Invite sent",
-        description: "Parent invite has been resent successfully.",
-        severity: "success",
-        duration: 3000,
-      });
-    } catch {
-      showToast({
-        message: "Resend failed",
-        description: "Unable to resend parent invite at the moment.",
-        severity: "error",
-        duration: 3000,
-      });
     }
   }
 
@@ -311,16 +210,6 @@ export function useParents() {
     handleOpenClassRoomFilter,
     setStatusAnchorEl,
     handleOpenStatusFilter,
-    deleteAccount,
-    isPending,
-    isStatusPending,
-    isResendInvitePending,
-    setDeleteAccount,
-    handleDelete,
-    statusAccount,
-    setStatusAccount,
-    handleToggleStatus,
-    handleResendInvite,
     metadata,
     totalItems,
     currentPage,

@@ -9,21 +9,11 @@ import { Button } from "@/modules/shared/component/Button";
 
 import useTeachersPage from "./hooks/useTeachersPage";
 import { DashboardRoutes } from "@/routes/dashboard.routes";
-import ConfirmModal from "@/components/ConfirmModal/confirmModal";
-import TrashIcon from "@/modules/shared/assets/svgs/trashicon.svg";
-import WarnIcon from "@/modules/shared/assets/svgs/warnIcon.svg";
 import { SearchTextfield } from "@/modules/shared/component/SearchTextfield";
-import { SchoolFilter } from "@/components/SchoolFilter";
 
 export default function TeachersPage() {
   const {
     router,
-    deactivateModalOpen,
-    deleteModalOpen,
-    handleDeactivate,
-    handleDelete,
-    setDeactivateModalOpen,
-    setDeleteModalOpen,
     filters,
     applyFilters,
     TeacherList,
@@ -35,12 +25,8 @@ export default function TeachersPage() {
     leadTeachersCount,
     assistantTeachersCount,
     pagination,
-    isDeactivatingTeacher,
-    isDeletingTeacher,
     handleSearch,
-    selectedTeacherStatus,
     mobileTeachersData,
-    canCreateTeacher,
   } = useTeachersPage();
 
   const handleRowClick = (_rowData: unknown, rowIndex: number) => {
@@ -165,39 +151,7 @@ export default function TeachersPage() {
         </Box>
       </Box>
 
-      <ConfirmModal
-        open={deactivateModalOpen}
-        onClose={() => setDeactivateModalOpen(false)}
-        onConfirm={handleDeactivate}
-        icon={<WarnIcon />}
-        title={
-          String(selectedTeacherStatus || "").toLowerCase() === "active"
-            ? "Are you sure you want to deactivate this teacher?"
-            : "Are you sure you want to activate this teacher?"
-        }
-        description={
-          String(selectedTeacherStatus || "").toLowerCase() === "active"
-            ? "You will be able to reactivate this teacher later."
-            : "This teacher will be able to access active features again."
-        }
-        confirmLabel={
-          String(selectedTeacherStatus || "").toLowerCase() === "active" ? "Deactivate" : "Activate"
-        }
-        cancelLabel="Cancel"
-        loading={isDeactivatingTeacher}
-      />
 
-      <ConfirmModal
-        open={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDelete}
-        icon={<TrashIcon />}
-        title="Are you sure you want to delete this teacher?"
-        description="This action cannot be undone. Once deleted, all related data will be permanently removed."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        loading={isDeletingTeacher}
-      />
     </Box>
   );
 }

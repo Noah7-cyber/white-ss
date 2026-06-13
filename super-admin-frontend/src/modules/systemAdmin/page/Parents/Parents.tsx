@@ -14,10 +14,7 @@ import ExpandMoreIcon from "@/modules/shared/assets/svgs/downIcon.svg";
 import { useParents } from "./hooks/useParents";
 import ParentRowActions from "@/modules/admin/component/ParentRowActions";
 import { useRouter } from "next/navigation";
-import TrashIcon from "@/modules/shared/assets/svgs/trashicon.svg";
-import ConfirmModal from "@/components/ConfirmModal/confirmModal";
 import { SearchTextfield } from "@/modules/shared/component/SearchTextfield";
-import WarnIcon from "@/modules/shared/assets/svgs/warnIcon.svg";
 import InitialsAvatar from "@/modules/shared/component/InitialsAvatar/InitialsAvatar";
 import FilterIcon from "@/modules/shared/assets/svgs/filter.svg";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
@@ -27,7 +24,6 @@ import {
   MobileChildrenCard,
   MobileChildrenCardSkeleton,
 } from "@/modules/shared/component/ChildrenPageComponent/MobileChildrenCard";
-import { SchoolFilter } from "@/components/SchoolFilter";
 
 export const Parents = () => {
   const router = useRouter();
@@ -49,15 +45,6 @@ export const Parents = () => {
     setStatusAnchorEl,
     handleOpenClassRoomFilter,
     handleOpenStatusFilter,
-    deleteAccount,
-    isPending,
-    setDeleteAccount,
-    handleDelete,
-    statusAccount,
-    setStatusAccount,
-    handleToggleStatus,
-    handleResendInvite,
-    isStatusPending,
     metadata,
     totalItems,
     currentPage,
@@ -338,38 +325,7 @@ export const Parents = () => {
           </div>
         </div>
       </MobileFilterDrawer>
-      <ConfirmModal
-        open={!!statusAccount}
-        onClose={() => setStatusAccount(null)}
-        onConfirm={handleToggleStatus}
-        icon={<WarnIcon />}
-        title={
-          String(statusAccount?.status || "").toLowerCase() === "active"
-            ? "Are you sure you want to deactivate this parent?"
-            : "Are you sure you want to activate this parent?"
-        }
-        description={
-          String(statusAccount?.status || "").toLowerCase() === "active"
-            ? "You will be able to reactivate this parent later."
-            : "This parent will be able to access the platform again."
-        }
-        confirmLabel={
-          String(statusAccount?.status || "").toLowerCase() === "active" ? "Deactivate" : "Activate"
-        }
-        cancelLabel="Cancel"
-        loading={isStatusPending}
-      />
-      <ConfirmModal
-        open={!!deleteAccount}
-        onClose={() => setDeleteAccount(null)}
-        onConfirm={handleDelete}
-        icon={<TrashIcon />}
-        title="Are you sure you want to delete this parent?"
-        description="This action cannot be undone. Once deleted, all related data will be permanently removed."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        loading={isPending}
-      />
+
     </Box>
   );
 };

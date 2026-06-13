@@ -1,6 +1,6 @@
 "use client";
 
-import { SETTINGS_ROUTES_OPTIONS, STAFF_SETTINGS_ROUTES_OPTIONS } from "@/constants";
+import { SYSTEM_ADMIN_SETTINGS_ROUTES_OPTIONS } from "@/constants";
 import { Box, Typography } from "@mui/material";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -52,11 +52,8 @@ const SettingsLayout: FC<SettingsLayoutProps> = ({ children }) => {
     );
   }
 
-  // Filter settings options based on role and map hrefs to appropriate routes
-  const filteredSettingsOptions =
-    userRole === "staff"
-      ? STAFF_SETTINGS_ROUTES_OPTIONS
-      : SETTINGS_ROUTES_OPTIONS;
+  // For super-admin-frontend, we explicitly use the system admin options.
+  const filteredSettingsOptions = SYSTEM_ADMIN_SETTINGS_ROUTES_OPTIONS;
 
   return (
     <Box className="flex flex-col gap-3 md:px-4 py-4 sm:px-6 sm:py-6 bg-white md:bg-transparent h-full md:h-fit">

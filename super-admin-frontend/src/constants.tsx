@@ -1157,6 +1157,21 @@ export const SETTINGS_ROUTES_OPTIONS = [
   },
 ];
 
+export const SYSTEM_ADMIN_SETTINGS_ROUTES_OPTIONS = [
+  {
+    label: "Account & Security",
+    href: DashboardRoutes.accountSecuritySettings,
+  },
+  {
+    label: "Notifications",
+    href: DashboardRoutes.notificationSetting,
+  },
+  {
+    label: "System Admins",
+    href: DashboardRoutes.systemAdminsSettings,
+  },
+];
+
 export const STAFF_SETTINGS_ROUTES_OPTIONS = [
   {
     label: "Account & Security",

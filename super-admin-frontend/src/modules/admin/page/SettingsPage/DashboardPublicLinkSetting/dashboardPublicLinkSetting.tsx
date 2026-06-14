@@ -10,14 +10,19 @@ import { getSchoolFromCookie, getSchoolPortalBaseDomain } from "@/utils/helper";
 import { useQueryService } from "@/utils/hooks/useQueryService";
 import { Tours } from "@/services/tour.service";
 import { GetSchoolResponse, schoolDynamicEndpoints } from "@/services/school.service";
+import { getUserRoleFromCookie } from "@/utils/helper";
 
 const DashboardPublicLinkSetting = () => {
   const { fetchedTours, isToursLoading, fetchedAdmissions, isAdmissionsLoading } = useTour();
+
+  const userRole = getUserRoleFromCookie();
+  const isSystemAdmin = userRole?.toLowerCase() === "systemadmin";
 
   const { data: schoolData } = useQueryService<object, GetSchoolResponse>({
     service: schoolDynamicEndpoints.getParticularSchool(),
     options: {
       keys: ["getSchool"],
+      enabled: !isSystemAdmin,
     },
   });
 

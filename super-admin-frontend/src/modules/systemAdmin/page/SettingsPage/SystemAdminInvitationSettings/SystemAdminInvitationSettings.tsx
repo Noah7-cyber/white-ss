@@ -21,7 +21,7 @@ export const SystemAdminInvitationSettings = () => {
   });
 
   const handleInvite = async () => {
-    if (!email) return;
+    if (!email || !firstName || !lastName) return;
     try {
       await inviteSystemAdmin({ email, firstName, lastName });
       showToast({
@@ -34,10 +34,7 @@ export const SystemAdminInvitationSettings = () => {
       setLastName("");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.log(error);
-      const errors = error?.response?.data?.errors;
-      const message = error?.response?.data?.message;
-      const description = Array.isArray(errors) ? errors.join(", ") : (message || "An error occurred");
+      console.log("Failed to send invitation:", error);
       showToast({
         message: "Failed to send invitation",
         description,

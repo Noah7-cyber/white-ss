@@ -9,6 +9,7 @@ import {
   UpdateInvitationRequest,
 } from "@/services/auth.service";
 import { schoolDynamicEndpoints, GetSchoolResponse } from "@/services/school.service";
+import { getUserRoleFromCookie } from "@/utils/helper";
 
 export const useInviteUser = () => {
   const { mutateAsync: inviteUser, isPending: isLoading } = useMutationService<
@@ -44,10 +45,14 @@ export const useInvitations = () => {
 };
 
 export const useSchoolAdmins = () => {
+  const userRole = getUserRoleFromCookie();
+  const isSystemAdmin = userRole?.toLowerCase() === "systemadmin";
+
   return useQueryService<object, GetSchoolResponse>({
     service: schoolDynamicEndpoints.getParticularSchool(),
     options: {
       keys: ["getSchool"],
+      enabled: !isSystemAdmin,
     },
   });
 };

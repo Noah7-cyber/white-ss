@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import { Button } from "@/modules/shared/component/Button";
 import { useMutationService } from "@/utils/hooks/useMutationService";
-import { authDynamicEndpoints } from "@/services/auth.service";
+import { authServices } from "@/services/auth.service";
 import { showToast } from "@/modules/shared/component/Toast";
 import { TextField } from "@/modules/shared/component/TextField";
 
@@ -14,14 +14,14 @@ export const SystemAdminInvitationSettings = () => {
   const [lastName, setLastName] = useState("");
 
   const { mutateAsync: inviteSystemAdmin, isPending } = useMutationService({
-    service: authDynamicEndpoints.inviteUser,
+    service: authServices.inviteUser,
     options: {
       disableToast: true,
     },
   });
 
   const handleInvite = async () => {
-    if (!email) return;
+    if (!email || !firstName || !lastName) return;
     try {
       await inviteSystemAdmin({ email, firstName, lastName });
       showToast({
@@ -32,7 +32,9 @@ export const SystemAdminInvitationSettings = () => {
       setEmail("");
       setFirstName("");
       setLastName("");
-    } catch (error: { response?: { data?: { message?: string } } }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.log("Failed to send invitation:", error);
       showToast({
         message: "Failed to send invitation",
         description: error?.response?.data?.errors?.join(", ") || error?.response?.data?.message || "An error occurred",

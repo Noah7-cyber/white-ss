@@ -37,7 +37,7 @@ export const SystemAdminInvitationSettings = () => {
       console.log("Failed to send invitation:", error);
       showToast({
         message: "Failed to send invitation",
-        description: error?.response?.data?.errors?.join(", ") || error?.response?.data?.message || "An error occurred",
+        description,
         severity: "error",
       });
     }

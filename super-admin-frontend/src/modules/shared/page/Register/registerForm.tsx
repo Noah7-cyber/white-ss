@@ -19,7 +19,7 @@ const RegisterForm = () => {
 
   const token = searchParams.get("token") || undefined;
 
-  const { control, handleSubmit, isPending, isInviteLoading, invitedEmail, router } = useRegister({
+  const { control, handleSubmit, isPending, router } = useRegister({
     role: normalizedRole,
     token,
   });
@@ -40,35 +40,10 @@ const RegisterForm = () => {
 
   return (
     <Box sx={{ display: "flex", justifyContent: "center", width: "100%", position: "relative" }}>
-      {isInviteLoading && (
-        <Box
-          sx={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 10,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(4px)",
-            // backgroundColor: "rgba(0,0,0,0.15)",
-          }}
-        >
-          <Box className="flex flex-col items-center gap-2 bg-white/80 rounded-lg px-6 py-4 shadow-md">
-            <Typography variant="body1" className="!font-medium text-primary-outlined">
-              Accepting invitation...
-            </Typography>
-            <Typography variant="body2" className="text-text-gray text-center max-w-xs">
-              Please wait while we confirm your invite details.
-            </Typography>
-          </Box>
-        </Box>
-      )}
-
       <form
         onSubmit={handleSubmit}
         className={`${normalizedRole === "admin" ? "max-w-[500px]" : "max-w-[480px]"
           } relative flex w-full flex-col gap-5 rounded-2xl bg-white p-5 shadow-md sm:gap-6 sm:p-8 md:p-12`}
-        style={isInviteLoading ? { filter: "blur(1px)", pointerEvents: "none" } : {}}
       >
         <Box className=" flex flex-col gap-4">
           <Box
@@ -122,7 +97,6 @@ const RegisterForm = () => {
             placeholder="Enter your email"
             labelOnTop
             fullWidth
-            disabled={!!invitedEmail}
             labelClassName="!text-sm !font-medium !text-input-gray"
             inputClasses="mt-1 !text-sm !h-10 !text-input-gray placeholder:!text-input-gray"
             className="flex-1"
@@ -158,13 +132,13 @@ const RegisterForm = () => {
             className="text-primary-white !rounded-lg"
             fullWidth
             type="submit"
-            disabled={isPending || isInviteLoading}
+            disabled={isPending}
             sx={{
               textTransform: "none",
               borderRadius: "8px",
               height: "48px",
               py: 1.2,
-              cursor: isPending || isInviteLoading ? "not-allowed" : "pointer",
+              cursor: isPending ? "not-allowed" : "pointer",
             }}
           >
             {isPending ? "Creating Account..." : "Create Account"}

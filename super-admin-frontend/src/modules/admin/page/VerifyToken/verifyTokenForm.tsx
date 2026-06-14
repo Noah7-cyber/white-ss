@@ -24,7 +24,7 @@ const VerifyTokenForm = () => {
 
   const loginHref = normalizedRole
     ? `${AuthRoutes.login}?role=${normalizedRole}`
-    : AuthRoutes.selectRole;
+    : "/system-admin/login";
 
   const resendLink = encryptedEmailFromUrl
     ? `${AuthRoutes.resendResetPassword}?email=${encodeURIComponent(

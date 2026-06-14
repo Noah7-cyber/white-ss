@@ -10,7 +10,7 @@ import { Control, UseFormGetValues, UseFormSetValue, Controller } from "react-ho
 import { useQueryService } from "@/utils/hooks/useQueryService";
 import { schoolDynamicEndpoints } from "@/services/school.service";
 import { GetSchoolResponse } from "@/services/school.service";
-import { getSchoolFromCookie, getSchoolPortalBaseDomain } from "@/utils/helper";
+import { getSchoolFromCookie, getSchoolPortalBaseDomain, getUserRoleFromCookie } from "@/utils/helper";
 import { useWatch } from "react-hook-form";
 import { useEffect, useState } from "react";
 
@@ -22,10 +22,14 @@ interface BasicInfoProps {
 
 const BasicInfo = ({ control, setValue, getValues }: BasicInfoProps) => {
   const school = getSchoolFromCookie();
+  const userRole = getUserRoleFromCookie();
+  const isSystemAdmin = userRole?.toLowerCase() === "systemadmin";
 
   const { data: schoolData } = useQueryService<GetSchoolResponse, any>({
     service: schoolDynamicEndpoints.getParticularSchool(),
-    options: {},
+    options: {
+      enabled: !isSystemAdmin,
+    },
   });
 
   const subDomain = (schoolData?.school?.subDomain || school?.subDomain || "").trim();

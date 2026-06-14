@@ -10,7 +10,7 @@ import { useInfiniteQueryService } from "@/utils/hooks/useInfiniteQueryService";
 import { schoolDynamicEndpoints } from "@/services/school.service";
 import { useRouter } from "next/navigation";
 import { countryServices } from "@/services/country.service";
-import { redirectToSchoolSubdomainIfChanged, setSchoolCookie } from "@/utils/helper";
+import { redirectToSchoolSubdomainIfChanged, setSchoolCookie, getUserRoleFromCookie } from "@/utils/helper";
 
 // import { AuthRoutes } from "@/routes/auth.routes"; // when wiring delete account redirect
 
@@ -26,10 +26,14 @@ const useDashboardSettings = () => {
 
   const { control, setValue, getValues, handleSubmit, watch } = formInstance;
 
+  const userRole = getUserRoleFromCookie();
+  const isSystemAdmin = userRole?.toLowerCase() === "systemadmin";
+
   const { data: schoolData, isLoading } = useQueryService<any, any>({
     service: schoolDynamicEndpoints.getParticularSchool(),
     options: {
       keys: ["getSchool"],
+      enabled: !isSystemAdmin,
     },
   });
 

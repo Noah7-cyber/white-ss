@@ -117,6 +117,7 @@ export class SystemAdminInvitationService {
         },
       };
     } catch (error) {
+      console.error("\n[SystemAdminInvitationService] FATAL ERROR IN createInvitation:\n", error, "\n");
       logger.error("Error creating system admin invitation:", error);
       const message = error instanceof Error ? error.message : SYSTEM_ADMIN_INVITATION_MESSAGES.INVITATION_CREATE_FAILED;
       return { success: false, message };
@@ -219,6 +220,7 @@ export class SystemAdminInvitationService {
         user: toAuthUser(result.user),
       };
     } catch (error) {
+      console.error("\n[SystemAdminInvitationService] FATAL ERROR IN acceptInvitation:\n", error, "\n");
       logger.error("Error accepting system admin invitation:", error);
       const message = error instanceof Error ? error.message : SYSTEM_ADMIN_INVITATION_MESSAGES.ACCEPT_FAILED;
       return { success: false, message };

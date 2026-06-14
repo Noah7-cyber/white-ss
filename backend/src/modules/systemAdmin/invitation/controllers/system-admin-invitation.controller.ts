@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../../../auth/middleware/middleware";
 import { AUTH_MESSAGES } from "../../../auth/constants/messages";
 import { activityLogger } from "../../../shared/services/activity-logger.service";
 import { systemAdminInvitationService } from "../services/system-admin-invitation.service";
+import { SYSTEM_ADMIN_INVITATION_MESSAGES } from "../constants/messages";
 
 export class SystemAdminInvitationController {
   async createInvitation(req: AuthenticatedRequest, res: Response): Promise<void> {
@@ -34,10 +35,17 @@ export class SystemAdminInvitationController {
         });
       }
 
-      res.status(result.success ? 201 : 400).json(result);
+      if (!result.success) {
+        const isClientError = Object.values(SYSTEM_ADMIN_INVITATION_MESSAGES).includes(result.message as any);
+        const statusCode = isClientError ? 400 : 500;
+        res.status(statusCode).json(result);
+        return;
+      }
+
+      res.status(201).json(result);
     } catch (error) {
-      console.error("Create system admin invitation error:", error);
-      res.status(500).json({ success: false, message: AUTH_MESSAGES.INTERNAL_ERROR });
+      console.error("\n[SystemAdminInvitationController] FATAL ERROR IN createInvitation:\n", error, "\n");
+      res.status(500).json({ success: false, message: error instanceof Error ? error.message : AUTH_MESSAGES.INTERNAL_ERROR });
     }
   }
 
@@ -52,10 +60,17 @@ export class SystemAdminInvitationController {
         password,
       });
 
-      res.status(result.success ? 201 : 400).json(result);
+      if (!result.success) {
+        const isClientError = Object.values(SYSTEM_ADMIN_INVITATION_MESSAGES).includes(result.message as any);
+        const statusCode = isClientError ? 400 : 500;
+        res.status(statusCode).json(result);
+        return;
+      }
+
+      res.status(201).json(result);
     } catch (error) {
-      console.error("Accept system admin invitation error:", error);
-      res.status(500).json({ success: false, message: AUTH_MESSAGES.INTERNAL_ERROR });
+      console.error("\n[SystemAdminInvitationController] FATAL ERROR IN acceptInvitation:\n", error, "\n");
+      res.status(500).json({ success: false, message: error instanceof Error ? error.message : AUTH_MESSAGES.INTERNAL_ERROR });
     }
   }
 }

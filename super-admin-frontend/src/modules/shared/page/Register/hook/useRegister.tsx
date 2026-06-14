@@ -115,8 +115,13 @@ export function useRegister(params?: UseRegisterParams) {
         const isInvitedUser = Boolean(params?.token);
 
         if (isInvitedUser) {
-          // Invited users route to login to now log in to the account
-          router.push(`${AuthRoutes.login}?role=admin`);
+          // Check if it's the system-admin path
+          if (typeof window !== "undefined" && window.location.pathname.includes("/system-admin")) {
+            router.push("/system-admin/login");
+          } else {
+            // Invited users route to login to now log in to the account
+            router.push(`${AuthRoutes.login}?role=admin`);
+          }
           return;
         }
 

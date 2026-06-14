@@ -176,9 +176,11 @@ const RegisterForm = () => {
               <Link
                 component={NextLink}
                 href={
-                  normalizedRole
-                    ? `${AuthRoutes.login}?role=${normalizedRole}`
-                    : AuthRoutes.selectRole
+                  typeof window !== "undefined" && window.location.pathname.includes("/system-admin")
+                    ? "/system-admin/login"
+                    : normalizedRole
+                      ? `${AuthRoutes.login}?role=${normalizedRole}`
+                      : AuthRoutes.selectRole
                 }
                 className="!text-brandColor-active !font-semibold !no-underline"
               >

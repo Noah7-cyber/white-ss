@@ -85,14 +85,14 @@ const useTeachersPage = () => {
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
-        const res = await getAllClassrooms({
+        const res = (await getAllClassrooms({
           delta: 100,
           pos: 0,
           sortBy: "createdAt",
           sortOrder: "ASC",
-        });
-        const data = res as { classrooms?: any[]; data?: any[] };
-        setClassrooms(data.classrooms || data.data || []);
+        })) as any;
+        const classroomList = res?.data?.classrooms || res?.classrooms || [];
+        setClassrooms(Array.isArray(classroomList) ? classroomList : []);
       } catch {
         setClassrooms([]);
       }
@@ -104,7 +104,7 @@ const useTeachersPage = () => {
   // Build a map of classroomId -> classroomName
   const classroomMap = useMemo(() => {
     const map = new Map<number, string>();
-    (classrooms || []).forEach((c: any) => {
+    (Array.isArray(classrooms) ? classrooms : []).forEach((c: any) => {
       if (c?.id != null && c.classroomName) {
         map.set(c.id, c.classroomName);
       }

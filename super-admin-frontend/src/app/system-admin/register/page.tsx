@@ -1,4 +1,4 @@
-import RegisterForm from "@/modules/shared/page/Register/registerForm";
+import SystemAdminAcceptInvitationForm from "@/modules/systemAdmin/page/Register/systemAdminAcceptInvitationForm";
 import React, { Suspense } from "react";
 import { Metadata } from "next";
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const Page = () => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <RegisterForm />
+      <SystemAdminAcceptInvitationForm />
     </Suspense>
   );
 };

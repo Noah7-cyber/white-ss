@@ -1163,10 +1163,6 @@ export const SYSTEM_ADMIN_SETTINGS_ROUTES_OPTIONS = [
     href: DashboardRoutes.accountSecuritySettings,
   },
   {
-    label: "Notifications",
-    href: DashboardRoutes.notificationSetting,
-  },
-  {
     label: "System Admins",
     href: DashboardRoutes.systemAdminsSettings,
   },

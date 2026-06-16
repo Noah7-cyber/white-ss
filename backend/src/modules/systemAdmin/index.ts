@@ -58,3 +58,6 @@ export { systemAdminSchoolService, SystemAdminSchoolService } from "./school/ser
 export { systemAdminAnalyticsRoutes } from "./analytics/routes/system-admin-analytics.routes";
 export { systemAdminAnalyticsController, SystemAdminAnalyticsController } from "./analytics/controllers/system-admin-analytics.controller";
 export { systemAdminAnalyticsService, SystemAdminAnalyticsService } from "./analytics/services/system-admin-analytics.service";
+export { systemAdminSettingsRoutes } from "./settings/routes/system-admin-settings.routes";
+export { systemAdminSettingsController, SystemAdminSettingsController } from "./settings/controllers/system-admin-settings.controller";
+export { systemAdminSettingsService, SystemAdminSettingsService } from "./settings/services/system-admin-settings.service";

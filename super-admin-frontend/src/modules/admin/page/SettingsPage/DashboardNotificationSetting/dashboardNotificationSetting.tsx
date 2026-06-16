@@ -15,10 +15,10 @@ import { Button } from "@/modules/shared/component/Button/WPButton";
 import { useMutationService } from "@/utils/hooks/useMutationService";
 import { useQueryService } from "@/utils/hooks/useQueryService";
 import {
-  schoolDynamicEndpoints,
-  type UpdateNotificationSettingsRequest,
-  type GetNotificationSettingsResponse,
-} from "@/services/school.service";
+  systemAdminSettingsEndpoints,
+  type GetSystemAdminNotificationSettingsResponse,
+  type UpdateSystemAdminNotificationSettingsRequest,
+} from "@/services/system-admin-settings.service";
 
 // Styled toggle switch
 const AntSwitch = styled(Switch)(() => ({
@@ -31,18 +31,26 @@ const AntSwitch = styled(Switch)(() => ({
     "&.Mui-checked": {
       transform: "translateX(14px)",
       color: "#fff",
-      "& + .MuiSwitch-track": { opacity: 1, backgroundColor: "#007C79", border: 0 },
+      "& + .MuiSwitch-track": {
+        opacity: 1,
+        backgroundColor: "#008080",
+      },
     },
   },
-  "& .MuiSwitch-thumb": { width: 14, height: 14, boxShadow: "none" },
+  "& .MuiSwitch-thumb": {
+    width: 14,
+    height: 14,
+    boxShadow: "none",
+  },
   "& .MuiSwitch-track": {
-    borderRadius: 9,
+    borderRadius: 18 / 2,
     opacity: 1,
-    backgroundColor: "#E9E9EA",
+    backgroundColor: "#E4E7EC",
     boxSizing: "border-box",
   },
 }));
 
+// Row helper
 const NotificationRow = ({
   title,
   description,
@@ -66,21 +74,13 @@ const NotificationRow = ({
 );
 
 export const DashboardNotificationSetting = () => {
-  // ---- Fetch school to get schoolId ----
-  const { data: schoolData, isLoading: isLoadingSchool } = useQueryService<any, any>({
-    service: schoolDynamicEndpoints.getParticularSchool(),
-    options: {},
-  });
-
-  const schoolId = schoolData?.school?.id;
-
   // ---- Fetch notification settings ----
   const { data: settingsData, isLoading: isLoadingSettings } = useQueryService<
     any,
-    GetNotificationSettingsResponse
+    GetSystemAdminNotificationSettingsResponse
   >({
-    service: schoolDynamicEndpoints.getNotificationSettings(schoolId ?? 0),
-    options: { enabled: !!schoolId },
+    service: systemAdminSettingsEndpoints.getNotificationSettings(),
+    options: {},
   });
 
   // ---- Local form state ----
@@ -113,10 +113,10 @@ export const DashboardNotificationSetting = () => {
 
   // ---- Update mutation ----
   const { mutateAsync: updateSettings, isPending: isSaving } = useMutationService<
-    UpdateNotificationSettingsRequest,
+    UpdateSystemAdminNotificationSettingsRequest,
     any
   >({
-    service: schoolDynamicEndpoints.updateNotificationSettings(schoolId ?? 0),
+    service: systemAdminSettingsEndpoints.updateNotificationSettings(),
     options: {
       successMessage: "Notification settings updated successfully",
       errorTitle: "Failed to update notification settings",
@@ -138,7 +138,7 @@ export const DashboardNotificationSetting = () => {
     });
   };
 
-  const isLoading = isLoadingSchool || isLoadingSettings;
+  const isLoading = isLoadingSettings;
 
   if (isLoading) {
     return (
@@ -153,7 +153,7 @@ export const DashboardNotificationSetting = () => {
       <Box className="flex flex-col gap-1 border-b border-solid border-border-lightGray pb-4">
         <Typography className="font-bold! text-black!">Notification Channels</Typography>
         <Typography className="text-[13px]! text-[#001F1FB2]!">
-          Configure how each user receives notifications from your school.
+          Configure how each user receives notifications.
         </Typography>
       </Box>
 
@@ -198,7 +198,7 @@ export const DashboardNotificationSetting = () => {
               Parent Notifications
             </Typography>
             <Typography className="text-[13px]! text-[#001F1FB2]!">
-              Choose how parents receive notifications from your school.
+              Choose how parents receive notifications.
             </Typography>
           </Box>
           <Box className="flex flex-col">
@@ -284,7 +284,7 @@ export const DashboardNotificationSetting = () => {
               Staff Notifications
             </Typography>
             <Typography className="text-[13px]! text-[#001F1FB2]!">
-              Choose how staffs receive notifications from the school.
+              Choose how staffs receive notifications.
             </Typography>
           </Box>
           <Box className="flex flex-col">

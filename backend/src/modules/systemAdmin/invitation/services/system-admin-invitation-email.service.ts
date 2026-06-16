@@ -11,6 +11,8 @@ function getSystemAdminAppBaseUrl(): string {
   }
   try {
     const baseUrlObj = new URL(baseUrl);
+    const host = baseUrlObj.hostname;
+    baseUrlObj.hostname = host.startsWith("app.") ? host : `app.${host}`;
     return baseUrlObj.toString().replace(/\/$/, "");
   } catch {
     return baseUrl;

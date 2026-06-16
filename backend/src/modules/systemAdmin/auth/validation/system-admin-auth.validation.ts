@@ -1,23 +1,14 @@
 import { Request, Response, NextFunction } from "express";
-import { validationResult } from "express-validator";
 import { validationService } from "../../../auth/services/validation.service";
 import { AUTH_MESSAGES } from "../../../auth/constants/messages";
 
 export const handleValidationErrors = (req: Request, res: Response, next: NextFunction): void => {
-  const errors = validationResult(req);
-  let errorArray: any[] = [];
-
-  if (!errors.isEmpty()) {
-    errorArray = errors.array();
-  } else if ((req as any).validationErrors && (req as any).validationErrors.length > 0) {
-    errorArray = (req as any).validationErrors;
-  }
-
-  if (errorArray.length > 0) {
+  const errors = req.validationErrors;
+  if (errors && errors.length > 0) {
     res.status(400).json({
       success: false,
       message: "Validation failed",
-      errors: errorArray.map((error: any) => error.msg),
+      errors: errors.map((error) => error.msg),
     });
     return;
   }
@@ -42,7 +33,7 @@ export const validateSystemAdminLogin = (req: Request, _res: Response, next: Nex
   }
 
   if (errors.length > 0) {
-    (req as any).validationErrors = errors;
+    req.validationErrors = errors;
   }
   next();
 };
@@ -59,7 +50,7 @@ export const validateSystemAdminMFA = (req: Request, _res: Response, next: NextF
   }
 
   if (errors.length > 0) {
-    (req as any).validationErrors = errors;
+    req.validationErrors = errors;
   }
   next();
 };

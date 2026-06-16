@@ -46,13 +46,11 @@ import { subscriptionRoutes } from "../modules/subscription";
 import {
   systemAdminAuthRoutes,
   systemAdminInvitationRoutes,
-  systemAdminStaffRoutes,
-  systemAdminParentRoutes,
-  systemAdminStudentRoutes,
   systemAdminAdminRoutes,
   systemAdminClassroomRoutes,
-  systemAdminSchoolRoutes,
-  systemAdminAnalyticsRoutes,
+  systemAdminParentRoutes,
+  systemAdminStaffRoutes,
+  systemAdminStudentRoutes,
 } from "../modules/systemAdmin";
 
 const router = Router();
@@ -82,13 +80,11 @@ router.use("/notifications", notificationRouter);
 router.use("/auth", authRoutes);
 router.use("/system-admin/auth", systemAdminAuthRoutes);
 router.use("/system-admin/invitations", systemAdminInvitationRoutes);
-router.use("/system-admin/staff", systemAdminStaffRoutes);
-router.use("/system-admin/parents", systemAdminParentRoutes);
-router.use("/system-admin/students", systemAdminStudentRoutes);
 router.use("/system-admin/admins", systemAdminAdminRoutes);
 router.use("/system-admin/classrooms", systemAdminClassroomRoutes);
-router.use("/system-admin/schools", systemAdminSchoolRoutes);
-router.use("/system-admin/analytics", systemAdminAnalyticsRoutes);
+router.use("/system-admin/parents", systemAdminParentRoutes);
+router.use("/system-admin/staff", systemAdminStaffRoutes);
+router.use("/system-admin/students", systemAdminStudentRoutes);
 router.use("/roles", rolesRoutes);
 router.use("/users", userStatsRoutes);
 router.use("/profile", ProfileRoutes);

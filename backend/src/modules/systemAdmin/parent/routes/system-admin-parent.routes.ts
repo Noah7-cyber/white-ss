@@ -30,6 +30,13 @@ systemAdminParentRoutes.get(
 );
 
 systemAdminParentRoutes.get(
+  "/export",
+  ...validateListParentsQuery,
+  handleValidationErrors,
+  (req, res) => systemAdminParentController.exportParents(req as AuthenticatedRequest, res),
+);
+
+systemAdminParentRoutes.get(
   "/:id",
   ...validateParentId,
   handleValidationErrors,

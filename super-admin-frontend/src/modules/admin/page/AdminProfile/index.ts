@@ -1,1 +1,0 @@
-export { AdminProfilePage } from "./adminProfile";

@@ -30,6 +30,13 @@ systemAdminStudentRoutes.get(
 );
 
 systemAdminStudentRoutes.get(
+  "/export",
+  ...validateListStudentsQuery,
+  handleValidationErrors,
+  (req, res) => systemAdminStudentController.exportStudents(req as AuthenticatedRequest, res),
+);
+
+systemAdminStudentRoutes.get(
   "/:id",
   ...validateStudentId,
   handleValidationErrors,

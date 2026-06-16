@@ -124,6 +124,46 @@ export class SystemAdminParentService {
     }
   }
 
+  /**
+   * Cross-tenant parent export. Unlike the school-scoped parent export, `schoolId`
+   * is optional: when provided the result is scoped to that school (respecting the
+   * System Admin's active school filter); when omitted every school is included.
+   */
+  async getParentsForExport(
+    filters: SystemAdminParentSearchFilters = {},
+    exportLimit = 10000,
+  ): Promise<Parent[]> {
+    const queryBuilder = this.parentRepository
+      .createQueryBuilder("parent")
+      .leftJoinAndSelect("parent.user", "user")
+      .leftJoinAndSelect("parent.school", "school")
+      .leftJoinAndSelect("parent.children", "children")
+      .leftJoinAndSelect("children.user", "childUser")
+      .where("parent.deletedAt IS NULL");
+
+    this.applyOptionalFilters(queryBuilder, filters);
+
+    const sortByInput = filters.sortBy || "lastName";
+    const sortOrder = filters.sortOrder || "ASC";
+    const sortFieldMap: Record<string, string> = {
+      firstname: "user.firstName",
+      firstName: "user.firstName",
+      lastname: "user.lastName",
+      lastName: "user.lastName",
+      createdat: "parent.createdAt",
+      createdAt: "parent.createdAt",
+    };
+    const sortField = sortFieldMap[sortByInput] || "user.lastName";
+    queryBuilder.orderBy(sortField, sortOrder);
+    if (sortField.includes("user.lastName")) {
+      queryBuilder.addOrderBy("user.firstName", sortOrder);
+    } else if (sortField.includes("user.firstName")) {
+      queryBuilder.addOrderBy("user.lastName", sortOrder);
+    }
+
+    return queryBuilder.take(exportLimit).getMany();
+  }
+
   private applyOptionalFilters(
     qb: SelectQueryBuilder<Parent>,
     filters: SystemAdminParentSearchFilters,

@@ -40,7 +40,14 @@ export class SystemAdminStaffController {
       };
 
       const result = await systemAdminStaffService.listStaff(filters);
-      res.status(result.success ? 200 : 400).json(result);
+
+      if (!result.success) {
+        res.status(400).json(result);
+        return;
+      }
+
+      const { success, message, ...data } = result;
+      res.status(200).json({ success, message, data });
     } catch (error) {
       logger.error("Error listing staff (system admin)", error);
       res.status(500).json({ success: false, message: SYSTEM_ADMIN_STAFF_MESSAGES.LIST_FAILED });

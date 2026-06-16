@@ -70,6 +70,42 @@ export class SystemAdminStudentService {
     }
   }
 
+  /**
+   * Cross-tenant student export. `schoolId` is optional: when provided the result
+   * is scoped to that school (respecting the System Admin's active school filter);
+   * when omitted every school is included.
+   */
+  async getStudentsForExport(
+    filters: SystemAdminStudentSearchFilters = {},
+    exportLimit = 10000,
+  ): Promise<Student[]> {
+    const queryBuilder = this.studentRepository
+      .createQueryBuilder("student")
+      .leftJoinAndSelect("student.user", "user")
+      .leftJoinAndSelect("student.school", "school")
+      .leftJoinAndSelect("student.currentClassroom", "currentClassroom")
+      .leftJoinAndSelect("student.parents", "parents")
+      .leftJoinAndSelect("parents.user", "parentUser")
+      .leftJoinAndSelect("student.medicalRecord", "medicalRecord")
+      .leftJoinAndSelect("student.emergencyContact", "emergencyContact");
+
+    this.applyBaseFilters(queryBuilder, filters);
+    this.applyOptionalFilters(queryBuilder, filters);
+
+    const sortBy = filters.sortBy || "lastName";
+    const sortOrder = filters.sortOrder || "ASC";
+    const sortFieldMap: Record<string, string> = {
+      firstName: "user.firstName",
+      lastName: "user.lastName",
+      createdAt: "student.createdAt",
+      admissionNumber: "student.admissionNumber",
+    };
+    const sortField = sortFieldMap[sortBy] || "user.lastName";
+    queryBuilder.orderBy(sortField, sortOrder);
+
+    return queryBuilder.take(exportLimit).getMany();
+  }
+
   async getStudentById(studentId: number): Promise<SystemAdminStudentDetailResult> {
     try {
       const student = await studentService.getStudentById(studentId);

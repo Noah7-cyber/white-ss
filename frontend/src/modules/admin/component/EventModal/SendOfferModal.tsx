@@ -15,10 +15,16 @@ import AddIcon from "@mui/icons-material/Add";
 import { Controller } from "react-hook-form";
 import { Box, Typography } from "@mui/material";
 import { TextField } from "@/modules/shared/component/TextField";
-import type { SendOfferChild, SendOfferItem } from "../../page/LeadsAndRequests/hooks/useSendOffer";
+import Dropzone from "react-dropzone";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
+import { IconButton, CircularProgress } from "@mui/material";
+import type { SendOfferChild, SendOfferItem, SendOfferAttachment } from "../../page/LeadsAndRequests/hooks/useSendOffer";
 import { formatAmount } from "@/utils/hooks/formatNumber";
 import { useMediaQuery } from "@/utils/hooks/useMediaQuery";
 import { MobileFormDrawer } from "@/modules/shared/component/MobileFormDrawer/MobileFormDrawer";
+import ScrollableTabBar from "@/layout/Shared/ScrollableTabBar";
+import ProfileTab from "../../page/Children/tabs/ProfileTab";
+import { ParentTab } from "../../page/Children/tabs/ParentTab";
 
 interface SendOfferModalProps {
   isOpen: boolean;
@@ -33,8 +39,16 @@ interface SendOfferModalProps {
   childrenData: SendOfferChild[];
   addChild: () => void;
   removeChild: (index: number) => void;
-  onGenerate: (e?: React.BaseSyntheticEvent) => void;
+  onSubmit: (e?: React.BaseSyntheticEvent) => void;
   errors?: any;
+  trigger?: any;
+  generateEmailContent?: () => void;
+  emailAttachments?: SendOfferAttachment[];
+  onAddAttachment?: (file: File) => void;
+  onRemoveAttachment?: (index: number) => void;
+  isSendingOffer?: boolean;
+  isUploadingDocuments?: boolean;
+  derivedData?: any;
 }
 
 const labelClass = "!text-sm !font-medium  !text-[#022F2F]";
@@ -83,10 +97,67 @@ const SendOfferModal: React.FC<SendOfferModalProps> = ({
   childrenData,
   addChild,
   removeChild,
-  onGenerate,
+  onSubmit,
+  trigger,
+  generateEmailContent,
+  emailAttachments,
+  onAddAttachment,
+  onRemoveAttachment,
+  isSendingOffer = false,
+  isUploadingDocuments = false,
+  derivedData,
 }) => {
   const isMobile = useMediaQuery("(max-width:768px)");
   const [openDatePickerIndex, setOpenDatePickerIndex] = useState<number | null>(null);
+  const tabsList = ["profile", "parent", "documents", "invoice", "email"] as const;
+  type TabType = typeof tabsList[number];
+  const [activeTab, setActiveTab] = useState<TabType>("profile");
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab("profile");
+    }
+  }, [isOpen]);
+
+  const handleNext = async () => {
+    if (["profile", "parent", "documents"].includes(activeTab)) {
+      const isValid = await trigger?.(["parentFirstName", "parentLastName", "children"]);
+      if (!isValid) return;
+      
+      if (activeTab === "profile") setActiveTab("parent");
+      else if (activeTab === "parent") setActiveTab("documents");
+      else if (activeTab === "documents") setActiveTab("invoice");
+    } else if (activeTab === "invoice") {
+      const isValid = await trigger?.(["items", "paymentMethod"]);
+      if (isValid) {
+        generateEmailContent?.();
+        setActiveTab("email");
+      }
+    }
+  };
+
+  const handleBack = () => {
+    if (activeTab === "email") setActiveTab("invoice");
+    else if (activeTab === "invoice") setActiveTab("documents");
+    else if (activeTab === "documents") setActiveTab("parent");
+    else if (activeTab === "parent") setActiveTab("profile");
+  };
+
+  const handleTabClick = async (tabId: TabType) => {
+    if (tabId === "email") {
+      generateEmailContent?.();
+    }
+    setActiveTab(tabId);
+  }
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      acceptedFiles.forEach((file) => {
+        onAddAttachment?.(file);
+      });
+    },
+    [onAddAttachment],
+  );
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
@@ -106,178 +177,136 @@ const SendOfferModal: React.FC<SendOfferModalProps> = ({
       className={`space-y-8 overflow-y-auto ${isMobile ? "py-4 pb-32" : "py-4"}`}
       style={!isMobile ? { maxHeight: "calc(85vh - 100px)", minHeight: "150px" } : undefined}
     >
-      {/* Parent Details */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold text-[#022F2F]">Parent Details</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <CWTextField
-            control={control}
-            name="parentFirstName"
-            label="First name"
-            placeholder="First name"
-            labelOnTop
-            requiredAsterisk
-            labelClassName={labelClass}
-            inputClasses={inputClasses}
-            className="w-full"
-          />
-          <CWTextField
-            control={control}
-            name="parentLastName"
-            label="Last name"
-            placeholder="Last name"
-            labelOnTop
-            requiredAsterisk
-            labelClassName={labelClass}
-            inputClasses={inputClasses}
-            className="w-full"
-          />
-        </div>
-      </div>
+      <div className="space-y-6">
+        <ScrollableTabBar className="border-b border-border-lightGray">
+          {[
+            { id: "profile", label: "Profile" },
+            { id: "parent", label: "Parent" },
+            { id: "documents", label: "Documents" },
+            { id: "invoice", label: "Invoice" },
+            { id: "email", label: "Email" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`shrink-0 whitespace-nowrap !text-sm !font-normal pb-2 px-3 ${
+                activeTab === t.id
+                  ? "!text-brandColor-active border-b !font-medium !border-brandColor-active"
+                  : "text-gray-500"
+              }`}
+              onClick={() => handleTabClick(t.id as any)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </ScrollableTabBar>
 
-      {/* Child Details - Multiple Children */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-[#022F2F]">Child Details</h3>
-          <button
-            type="button"
-            onClick={addChild}
-            className="text-sm flex items-center cursor-pointer gap-1 font-medium text-[#008080] hover:text-[#006666]"
-          >
-            <AddIcon fontSize="small" /> Add New Child
-          </button>
-        </div>
+          {activeTab === "profile" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-[#022F2F]">Child Details</h3>
+                <button
+                  type="button"
+                  onClick={addChild}
+                  className="text-sm flex items-center cursor-pointer gap-1 font-medium text-[#008080] hover:text-[#006666]"
+                >
+                  <AddIcon fontSize="small" /> Add New Child
+                </button>
+              </div>
 
-        {childrenData.map((child, index) => (
-          <div key={child.id || index} className="space-y-4 relative">
-            {childrenData.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeChild(index)}
-                className="absolute top-2 right-0 cursor-pointer p-1 text-[#F04438] hover:bg-red-50 rounded"
-                aria-label="Remove child"
-              >
-                <DeleteOutlineIcon fontSize="small" />
-              </button>
-            )}
-
-            {childrenData.length > 1 && (
-              <h4 className="text-sm font-semibold text-[#022F2F] mb-2">Child {index + 1}</h4>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <CWTextField
-                control={control}
-                name={`children.${index}.firstName`}
-                label="First name"
-                placeholder="First name"
-                labelOnTop
-                requiredAsterisk
-                labelClassName={labelClass}
-                inputClasses={inputClasses}
-                className="w-full"
-              />
-              <CWTextField
-                control={control}
-                name={`children.${index}.lastName`}
-                label="Last name"
-                placeholder="Last name"
-                labelOnTop
-                requiredAsterisk
-                labelClassName={labelClass}
-                inputClasses={inputClasses}
-                className="w-full"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className={labelClass}>
-                  Date of birth
-                  <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <Controller
-                  name={`children.${index}.dateOfBirth`}
-                  control={control}
-                  render={({ field, fieldState: { error } }) => (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                      <DatePicker
-                        open={openDatePickerIndex === index}
-                        onOpen={() => setOpenDatePickerIndex(index)}
-                        onClose={() => setOpenDatePickerIndex(null)}
-                        value={field.value ? dayjs(field.value, "DD/MM/YYYY") : null}
-                        onChange={(newValue) => {
-                          const formatted = newValue ? newValue.format("DD/MM/YYYY") : "";
-                          field.onChange(formatted);
-                        }}
-                        format="DD/MM/YYYY"
-                        desktopModeMediaQuery="@media (min-width: 0px)"
-                        slots={{
-                          openPickerIcon: () => <CalendarIcon className="text-gray-400 " />,
-                        }}
-                        slotProps={{
-                          openPickerButton: {
-                            edge: "end",
-                          },
-                          textField: {
-                            fullWidth: true,
-                            placeholder: "01/01/2001",
-                            error: !!error,
-                            onClick: () => setOpenDatePickerIndex(index),
-                            sx: {
-                              "& .MuiOutlinedInput-root": {
-                                borderRadius: "5px",
-                                backgroundColor: "white",
-                                height: "40px",
-                                "& fieldset": { borderColor: error ? "#F04438" : "#0250504D" },
-                                "&:hover fieldset": {
-                                  borderColor: error ? "#F04438" : "#D0D5DD",
-                                },
-                                "&.Mui-focused fieldset": {
-                                  borderColor: error ? "#F04438" : "#008080",
-                                  borderWidth: "1px",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                fontSize: "0.875rem",
-                                color: "#1D2939",
-                              },
-                            },
-                          },
-                        }}
-                      />
-                      {error && (
-                        <Typography variant="caption" sx={{ color: "#F04438", ml: 1 }}>
-                          {error.message}
-                        </Typography>
-                      )}
-                    </Box>
+              {childrenData.map((child, index) => (
+                <div key={child.id || index} className="space-y-6 relative border p-4 rounded-xl border-gray-200">
+                  {childrenData.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeChild(index)}
+                      className="absolute top-4 right-4 cursor-pointer p-1 text-[#F04438] hover:bg-red-50 rounded"
+                      aria-label="Remove child"
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </button>
                   )}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className={labelClass}>
-                  Classroom
-                  <span className="text-red-500 ml-0.5">*</span>
-                </label>
-                <CWDropdown
-                  control={control}
-                  name={`children.${index}.classroom`}
-                  options={classroomOptions}
-                  isLoading={isLoadingClassrooms}
-                  isForm
-                  requiredAsterisk
-                  textFieldProps={{
-                    placeholder: "Select classroom",
-                    inputClasses: "!text-sm !h-10 !text-[#022F2F]",
-                  }}
-                />
+
+                  {childrenData.length > 1 && (
+                    <h4 className="text-sm font-semibold text-[#022F2F]">Child {index + 1}</h4>
+                  )}
+
+                  <ProfileTab
+                    control={control}
+                    handleImageUpload={() => {}}
+                    selectedImage={null}
+                    prefix={`children.${index}.`}
+                    hideEmergency
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "parent" && (
+            <div className="space-y-4">
+              <ParentTab
+                control={control}
+                handleImageUpload={() => {}}
+                selectedImage={null}
+                parents={control._formValues?.parents || []}
+                addParent={() => {
+                  const currentParents = control._formValues?.parents || [];
+                  const newParent = { title: "", firstName: "", lastName: "", relationship: "", phone: "", email: "", address: "" };
+                  control._formValues.parents = [...currentParents, newParent];
+                }}
+                removeParent={(index: number) => {
+                  const currentParents = control._formValues?.parents || [];
+                  const updatedParents = currentParents.filter((_: any, i: number) => i !== index);
+                  control._formValues.parents = updatedParents;
+                }}
+              />
+            </div>
+          )}
+
+          {activeTab === "documents" && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-[#022F2F]">Documents</h3>
+              <p className="text-sm text-gray-500">Documents submitted during admission are available below.</p>
+              
+              <div className="space-y-3">
+                {derivedData?.birthCertificate ? (
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <span className="text-sm font-medium">Birth Certificate</span>
+                    <a 
+                      href={derivedData.birthCertificate} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-[#008080] hover:underline"
+                    >
+                      View
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">No Birth Certificate provided.</p>
+                )}
+
+                {derivedData?.immunizationRecord ? (
+                  <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <span className="text-sm font-medium">Immunization Record</span>
+                    <a 
+                      href={derivedData.immunizationRecord} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-[#008080] hover:underline"
+                    >
+                      View
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">No Immunization Record provided.</p>
+                )}
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
+          )}
+        </div>
+        {activeTab === "invoice" && (
+      <>
       {/* Items Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -605,25 +634,139 @@ const SendOfferModal: React.FC<SendOfferModalProps> = ({
           className="w-full"
         />
       </div>
+      </>
+      )}
+
+      {activeTab === "email" && (
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex flex-col gap-5">
+              <CWTextField
+                name="emailTo"
+                control={control}
+                fullWidth
+                labelOnTop
+                label="Recipient"
+                size="small"
+                startIcon={<Typography className="!text-[#4F4F4F] !text-xs !font-normal">To:</Typography>}
+                inputClasses="!rounded-lg !font-semibold flex items-center"
+                labelClassName="!text-sm !font-medium !text-input-gray"
+              />
+
+              <CWTextField
+                name="emailSubject"
+                control={control}
+                fullWidth
+                size="small"
+                startIcon={<Typography className="!text-[#4F4F4F] !text-xs !font-normal">Subject:</Typography>}
+                inputClasses="!rounded-lg !text-[#022F2F] !font-semibold"
+              />
+
+              <CWTextArea
+                name="emailBody"
+                control={control}
+                fullWidth
+                minRows={8}
+                maxRows={12}
+                placeholder="Enter message..."
+                labelClassName="!text-sm !font-medium !text-input-gray"
+                inputClasses="mt-1 !text-sm  !text-input-gray"
+                className="!text-xs !text-[#344054] !font-normal"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <Typography className="!text-sm !font-medium text-[#022F2F]">Attachments</Typography>
+              <Dropzone onDrop={onDrop}>
+                {({ getRootProps, getInputProps }) => (
+                  <div {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    <button
+                      type="button"
+                      className="text-[#008080] text-xs font-semibold bg-transparent hover:bg-[#0080800A] whitespace-nowrap"
+                    >
+                      + Add attachment
+                    </button>
+                  </div>
+                )}
+              </Dropzone>
+            </div>
+
+            <div className="space-y-2">
+              {emailAttachments?.map((attachment, idx) => (
+                <div
+                  key={`${attachment.url}-${idx}`}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-[#EAECF0] p-3 bg-[#F9FAFB]"
+                >
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#008080] text-white shrink-0">
+                      <UploadFileIcon />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-[#344054] truncate">{attachment.name}</p>
+                      <p className="text-xs text-[#667085] truncate">{attachment.url}</p>
+                    </div>
+                  </div>
+
+                  <IconButton
+                    size="small"
+                    className="text-[#98A2B3] hover:text-[#F04438]"
+                    onClick={() => onRemoveAttachment?.(idx)}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 
   const footer = (
-    <div className={`flex gap-3 ${isMobile ? "flex-col-reverse" : "justify-end"}`}>
-      <button
-        type="button"
-        onClick={onClose}
-        className={`px-4 py-2 text-sm font-semibold text-[#344054] bg-white border border-[#D0D5DD] rounded-lg hover:bg-gray-50 shadow-sm ${isMobile ? "w-full" : ""}`}
-      >
-        Cancel
-      </button>
-      <button
-        type="button"
-        onClick={onGenerate}
-        className={`px-4 py-2 text-sm font-semibold text-white bg-[#008080] rounded-lg hover:bg-[#006666] shadow-sm ${isMobile ? "w-full" : ""}`}
-      >
-        Generate
-      </button>
+    <div className={`flex gap-3 ${isMobile ? "flex-col-reverse" : "justify-between w-full"}`}>
+      <div>
+         {activeTab !== "profile" && (
+            <button
+               type="button"
+               onClick={handleBack}
+               className={`px-4 py-2 text-sm font-semibold text-[#344054] bg-white border border-[#D0D5DD] rounded-lg hover:bg-gray-50 shadow-sm ${isMobile ? "w-full" : ""}`}
+            >
+               Back
+            </button>
+         )}
+      </div>
+      <div className={`flex gap-3 ${isMobile ? "flex-col-reverse" : "justify-end"}`}>
+         <button
+            type="button"
+            onClick={onClose}
+            className={`px-4 py-2 text-sm font-semibold text-[#344054] bg-white border border-[#D0D5DD] rounded-lg hover:bg-gray-50 shadow-sm ${isMobile ? "w-full" : ""}`}
+         >
+            Cancel
+         </button>
+         {activeTab !== "email" ? (
+            <button
+               type="button"
+               onClick={handleNext}
+               className={`px-4 py-2 text-sm font-semibold text-white bg-[#008080] rounded-lg hover:bg-[#006666] shadow-sm ${isMobile ? "w-full" : ""}`}
+            >
+               Next
+            </button>
+         ) : (
+            <button
+               type="button"
+               onClick={onSubmit}
+               disabled={isSendingOffer || isUploadingDocuments}
+               className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#008080] rounded-lg hover:bg-[#006666] shadow-sm disabled:opacity-50 ${isMobile ? "w-full" : ""}`}
+            >
+               {(isSendingOffer || isUploadingDocuments) && <CircularProgress size={16} className="!text-white" />}
+               {!(isSendingOffer || isUploadingDocuments) && "Send Offer"}
+            </button>
+         )}
+      </div>
     </div>
   );
 

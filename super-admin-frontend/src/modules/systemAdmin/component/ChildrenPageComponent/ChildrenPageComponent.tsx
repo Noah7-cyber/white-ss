@@ -64,6 +64,8 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
     hasPermission,
     handleExport,
     isExporting,
+    filters,
+    applyFilters,
   } = useChildren(role);
 
   const router = useRouter();
@@ -81,10 +83,6 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
     <Box className="space-y-6 flex flex-col h-full p-4 md:p-5">
       <Box className="hidden w-full md:flex items-center justify-between gap-4">
         <Typography className="font-semibold! text-xl! text-text-primary!">Children</Typography>
-        <SchoolFilter
-          value={filters?.schoolId}
-          onChange={(schoolId) => applyFilters({ schoolId, pos: 0 })}
-        />
       </Box>
 
       <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-visible hide-scrollbar min-h-20 md:min-h-35 *:shrink-0 md:*:shrink">
@@ -113,24 +111,32 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
 
       <Box>
         <Box className="gap-3 hidden md:flex justify-end lg:hidden">
-          <button
-            onClick={handleOpenGradeFilter}
-            className="flex items-center justify-around px-3 h-10 text-gray-700 rounded-lg cursor-pointer border border-gray-200 bg-transparent"
-          >
-            <span className="text-sm font-medium">
-              {classroomFilters.find((f) => f.isActive)?.label || "All Classrooms"}
-            </span>
-            <ExpandMoreIcon className="ml-2" />
-          </button>
-          <FilterPopover
-            open={Boolean(gradeAnchorEl)}
-            anchorEl={gradeAnchorEl}
-            onClose={() => setGradeAnchorEl(null)}
-            options={classroomFilters}
-            onSelect={handleClassroomFilterChange}
-            onScrollEnd={fetchMoreClassrooms}
-            width={180}
+          <SchoolFilter
+            value={filters?.schoolId}
+            onChange={(schoolId) => applyFilters({ schoolId, pos: 0 })}
           />
+          {!!filters?.schoolId && (
+            <>
+              <button
+                onClick={handleOpenGradeFilter}
+                className="flex items-center justify-around px-3 h-10 text-gray-700 rounded-lg cursor-pointer border border-gray-200 bg-transparent"
+              >
+                <span className="text-sm font-medium">
+                  {classroomFilters.find((f) => f.isActive)?.label || "All Classrooms"}
+                </span>
+                <ExpandMoreIcon className="ml-2" />
+              </button>
+              <FilterPopover
+                open={Boolean(gradeAnchorEl)}
+                anchorEl={gradeAnchorEl}
+                onClose={() => setGradeAnchorEl(null)}
+                options={classroomFilters}
+                onSelect={handleClassroomFilterChange}
+                onScrollEnd={fetchMoreClassrooms}
+                width={180}
+              />
+            </>
+          )}
           {hasPermission("student", "view") && (
             <Button
               className="rounded-lg! !bg-white !text-[#02273A] !border !border-gray-200"
@@ -185,24 +191,32 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
         </div>
         {
           <Box className="gap-3 hidden lg:flex">
-            <button
-              onClick={handleOpenGradeFilter}
-              className="flex items-center justify-around px-3 h-10 text-gray-700 rounded-lg cursor-pointer border border-gray-200 bg-transparent"
-            >
-              <span className="text-sm font-medium">
-                {classroomFilters.find((f) => f.isActive)?.label || "All Classrooms"}
-              </span>
-              <ExpandMoreIcon className="ml-2" />
-            </button>
-            <FilterPopover
-              open={Boolean(gradeAnchorEl)}
-              anchorEl={gradeAnchorEl}
-              onClose={() => setGradeAnchorEl(null)}
-              options={classroomFilters}
-              onSelect={handleClassroomFilterChange}
-              onScrollEnd={fetchMoreClassrooms}
-              width={180}
+            <SchoolFilter
+              value={filters?.schoolId}
+              onChange={(schoolId) => applyFilters({ schoolId, pos: 0 })}
             />
+            {!!filters?.schoolId && (
+              <>
+                <button
+                  onClick={handleOpenGradeFilter}
+                  className="flex items-center justify-around px-3 h-10 text-gray-700 rounded-lg cursor-pointer border border-gray-200 bg-transparent"
+                >
+                  <span className="text-sm font-medium">
+                    {classroomFilters.find((f) => f.isActive)?.label || "All Classrooms"}
+                  </span>
+                  <ExpandMoreIcon className="ml-2" />
+                </button>
+                <FilterPopover
+                  open={Boolean(gradeAnchorEl)}
+                  anchorEl={gradeAnchorEl}
+                  onClose={() => setGradeAnchorEl(null)}
+                  options={classroomFilters}
+                  onSelect={handleClassroomFilterChange}
+                  onScrollEnd={fetchMoreClassrooms}
+                  width={180}
+                />
+              </>
+            )}
             {hasPermission("student", "view") && (
               <Button
                 className="rounded-lg! !bg-white !text-[#02273A] !border !border-gray-200"
@@ -301,17 +315,28 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
         onApply={() => setMobileFilterOpen(false)}
         onReset={() => handleClassroomFilterChange("all")}
       >
-        <div className="flex flex-col gap-2">
-          <Typography className="!text-sm !font-medium !text-[#02273A]">All Classes</Typography>
-          <Dropdown
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Typography className="!text-sm !font-medium !text-[#02273A]">School</Typography>
+            <SchoolFilter
+              value={filters?.schoolId}
+              onChange={(schoolId) => applyFilters({ schoolId, pos: 0 })}
+            />
+          </div>
+          {!!filters?.schoolId && (
+            <div className="flex flex-col gap-2">
+              <Typography className="!text-sm !font-medium !text-[#02273A]">All Classes</Typography>
+              <Dropdown
             isForm
             options={classroomFilters.map((f) => ({ value: f.value, name: f.label }))}
             value={classroomFilters.find((f) => f.isActive)?.value ?? "all"}
             onSelect={(value) => handleClassroomFilterChange(value as string)}
             textFieldProps={{ placeholder: "Select classes", isRounded: true }}
             hasMore={Boolean(hasMoreClassrooms)}
-            onLoadMore={fetchMoreClassrooms}
-          />
+                onLoadMore={fetchMoreClassrooms}
+              />
+            </div>
+          )}
         </div>
       </MobileFilterDrawer>
 

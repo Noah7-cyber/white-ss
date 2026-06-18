@@ -332,7 +332,7 @@ export const adminSidebarItems: SidebarItemProps[] = [
   },
   {
     id: 41,
-    label: "System Admins",
+    label: "Admins",
     icon: <Image src="/assets/svg/mage_users.svg" alt="parent-logo" width={20} height={20} />,
     path: DashboardRoutes.admins,
   },
@@ -427,9 +427,9 @@ export const adminSidebarItems: SidebarItemProps[] = [
     id: 13,
     label: "Settings",
     icon: <SettingsIcon />,
-    path: DashboardRoutes.profileSettings,
+    path: DashboardRoutes.settings,
     matchPaths: [
-      DashboardRoutes.profileSettings,
+      DashboardRoutes.settings,
       DashboardRoutes.accountSecuritySettings,
       DashboardRoutes.notificationSetting,
       DashboardRoutes.permissionSettings,
@@ -440,7 +440,9 @@ export const adminSidebarItems: SidebarItemProps[] = [
   },
 ];
 
-export const systemAdminSidebarItems: SidebarItemProps[] = adminSidebarItems;
+export const systemAdminSidebarItems: SidebarItemProps[] = adminSidebarItems.filter(
+  (item) => !["Communication", "Invoicing", "Reports", "Guides", "Admission", "Attendance"].includes(item.label)
+);
 
 export const staffSidebarItems: SidebarItemProps[] = [
   {
@@ -1152,7 +1154,7 @@ export const SETTINGS_ROUTES_OPTIONS = [
     href: DashboardRoutes.paymentMethodSetting,
   },
   {
-    label: "System Admins",
+    label: "Admins",
     href: DashboardRoutes.systemAdminsSettings,
   },
 ];
@@ -1163,7 +1165,7 @@ export const SYSTEM_ADMIN_SETTINGS_ROUTES_OPTIONS = [
     href: DashboardRoutes.accountSecuritySettings,
   },
   {
-    label: "System Admins",
+    label: "Admins",
     href: DashboardRoutes.systemAdminsSettings,
   },
 ];

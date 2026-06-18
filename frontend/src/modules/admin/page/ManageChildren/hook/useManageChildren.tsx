@@ -4,7 +4,7 @@
 import type React from "react";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { redirect, useParams } from "next/navigation";
+import { redirect, useParams, useSearchParams } from "next/navigation";
 import { useFormValidator } from "@/utils/hooks/useFormValidator";
 import {
   childValidationSchema,
@@ -58,6 +58,7 @@ import { useQueryService } from "@/utils/hooks/useQueryService";
 import { classroomServices, type GetAllClassroomsResponse } from "@/services/classroom.service";
 import { useInfiniteQueryService } from "@/utils/hooks/useInfiniteQueryService";
 import { type GetSchoolResponse, schoolDynamicEndpoints } from "@/services/school.service";
+import { formDynamicEndpoints, type GetFormResponseByIdResponse } from "@/services/form.service";
 import { blobUrlToFile } from "@/utils/helper";
 
 type ClassroomWithStudents = GetAllClassroomsResponse["data"][number] & {
@@ -81,7 +82,16 @@ const useManageChild = ({
   onComplete?: () => void;
 }) => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const childId = params?.id as string | undefined;
+  const formResponseId = searchParams?.get("formResponseId");
+
+  const { data: formResponseData } = useQueryService<any, GetFormResponseByIdResponse>({
+    service: formResponseId ? formDynamicEndpoints.getFormResponseById(formResponseId) : { path: "", method: "" as any },
+    options: {
+      enabled: !!formResponseId,
+    },
+  });
 
   const [imageBlob, setImageBlob] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -254,6 +264,46 @@ const useManageChild = ({
       setValue("documents", child.documents);
     }
   }, [childId, childResponse]);
+
+  useEffect(() => {
+    if (!formResponseData?.response) return;
+
+    const response = formResponseData.response;
+    const items = response.formResponseItems || [];
+    
+    // Heuristics to find names
+    const findValue = (keywords: string[]) => {
+      const found = items.find(i => 
+        keywords.every(k => i.formItem?.title.toLowerCase().includes(k))
+      );
+      return found?.value || "";
+    };
+
+    // Prepopulate child info
+    const childFirstName = findValue(["child", "first", "name"]) || findValue(["first", "name"]);
+    const childLastName = findValue(["child", "last", "name"]) || findValue(["last", "name"]);
+    const childDob = findValue(["date", "birth"]) || findValue(["dob"]);
+    
+    if (childFirstName) setValue("generalInfo.firstName", childFirstName, { shouldDirty: true });
+    if (childLastName) setValue("generalInfo.lastName", childLastName, { shouldDirty: true });
+    if (childDob) setValue("generalInfo.dateOfBirth", childDob, { shouldDirty: true });
+    
+    // Prepopulate parent info (first parent)
+    const [firstNames = "", ...lastNamesArr] = (response.names?.[0] || "").split(" ");
+    const parentEmail = response.email || "";
+    const parentPhone = findValue(["phone"]) || findValue(["mobile"]) || "";
+    
+    if (firstNames || parentEmail || parentPhone) {
+      const currentParents = getValues("parents") || [];
+      const parentToUpdate = currentParents[0] || initialChildValues.parents[0];
+      
+      setValue("parents.0.firstName", firstNames, { shouldDirty: true });
+      setValue("parents.0.lastName", lastNamesArr.join(" "), { shouldDirty: true });
+      setValue("parents.0.email", parentEmail, { shouldDirty: true });
+      setValue("parents.0.phone", parentPhone, { shouldDirty: true });
+    }
+
+  }, [formResponseData, setValue, getValues]);
 
   const [activeTab, setActiveTab] = useState<AddChildTab>("profile");
 
@@ -816,12 +866,16 @@ const useManageChild = ({
         updatePayload.documents = finalDocuments;
       }
 
+      if (formResponseId) {
+        updatePayload.formResponseId = Number(formResponseId);
+      }
       payload = updatePayload;
     } else {
       payload = {
         schoolId: schoolData?.school?.id,
         schedule: form.schedule,
         classroomId: form.classrooms,
+        ...(formResponseId && { formResponseId: Number(formResponseId) }),
         generalInfo: {
           firstName: form.generalInfo.firstName,
           lastName: form.generalInfo.lastName,

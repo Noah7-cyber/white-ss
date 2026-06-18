@@ -12,7 +12,6 @@ import CancelTourModalForLeads from "@/modules/admin/component/EventModal/Cancel
 import RescheduleTourModal from "@/modules/admin/component/EventModal/RescheduleTourModal";
 import ViewTourBookingModal from "@/modules/admin/component/EventModal/ViewTourBookingModal";
 import SendOfferModal from "@/modules/admin/component/EventModal/SendOfferModal";
-import SendOfferEmailModal from "@/modules/admin/component/EventModal/SendOfferEmailModal";
 import {
   BookedTour,
   GetTourBookingByIdResponse,
@@ -71,13 +70,12 @@ const LeadsAndRequests = () => {
     classroomOptions,
     isLoadingClassrooms,
     showSendOfferModal,
-    showSendOfferEmailModal,
     openSendOfferModal,
     closeSendOfferModal,
-    closeSendOfferEmailModal,
-    emailData,
+    emailAttachments,
     addAttachment,
     removeAttachment,
+    generateEmailContent,
     control,
     items,
     addRow,
@@ -86,10 +84,13 @@ const LeadsAndRequests = () => {
     children,
     addChild,
     removeChild,
-    submitGenerateOffer,
-    handleSendFinalOffer,
+    updateChild,
+    submitSendOffer,
+    errors,
+    trigger,
     isSendingOffer,
     isUploadingDocuments,
+    derivedData,
   } = useSendOffer(() => {
     void refetch();
   });
@@ -398,20 +399,16 @@ const LeadsAndRequests = () => {
         childrenData={children}
         addChild={addChild}
         removeChild={removeChild}
-        onGenerate={submitGenerateOffer}
-      />
-
-      <SendOfferEmailModal
-        isOpen={showSendOfferEmailModal}
-        onClose={closeSendOfferEmailModal}
-        data={emailData}
+        onSubmit={submitSendOffer}
+        errors={errors}
+        trigger={trigger}
+        generateEmailContent={generateEmailContent}
+        emailAttachments={emailAttachments}
         onAddAttachment={addAttachment}
         onRemoveAttachment={removeAttachment}
-        onSend={(data) => {
-          handleSendFinalOffer(data);
-        }}
-        isLoading={isSendingOffer}
+        isSendingOffer={isSendingOffer}
         isUploadingDocuments={isUploadingDocuments}
+        derivedData={derivedData}
       />
 
       <CancelTourModalForLeads

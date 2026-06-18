@@ -6,10 +6,13 @@ import { InsightCard } from "@/components/InsightCard";
 import { Box, Typography } from "@mui/material";
 import PlusIcon from "@/modules/shared/assets/svgs/plus-icon.svg";
 import { Button } from "@/modules/shared/component/Button";
+import { SchoolFilter } from "@/components/SchoolFilter";
 
 import useTeachersPage from "./hooks/useTeachersPage";
 import { DashboardRoutes } from "@/routes/dashboard.routes";
 import { SearchTextfield } from "@/modules/shared/component/SearchTextfield";
+import FilterPopover from "@/modules/shared/component/FilterPopover/filterPopover";
+import ExpandMoreIcon from "@/modules/shared/assets/svgs/downIcon.svg";
 
 export default function TeachersPage() {
   const {
@@ -27,6 +30,11 @@ export default function TeachersPage() {
     pagination,
     handleSearch,
     mobileTeachersData,
+    gradeAnchorEl,
+    setGradeAnchorEl,
+    handleOpenGradeFilter,
+    classroomFilters,
+    handleClassroomFilterChange,
   } = useTeachersPage();
 
   const handleRowClick = (_rowData: unknown, rowIndex: number) => {
@@ -38,6 +46,10 @@ export default function TeachersPage() {
     <Box className="p-5 flex flex-col gap-6">
       <Box className="hidden md:flex items-center justify-between">
         <Typography className="!text-xl !font-semibold">Teachers</Typography>
+        <SchoolFilter
+          value={filters?.schoolId}
+          onChange={(schoolId) => applyFilters({ schoolId, pos: 0 })}
+        />
       </Box>
 
       <div className="flex md:grid md:grid-cols-4 gap-4 overflow-x-auto md:overflow-x-visible hide-scrollbar min-h-20 md:min-h-35 *:shrink-0 md:*:shrink">
@@ -71,15 +83,28 @@ export default function TeachersPage() {
           fullWidth
           className="max-w-full md:w-96 md:max-w-112.5 bg-white rounded-full"
         />
-        <div title="Read-Only Access">
-          <Button
-            className="!rounded-lg !hidden md:!flex whitespace-nowrap"
-            startIcon={<PlusIcon />}
-            onClick={() => router.push(DashboardRoutes.addTeacher)}
-            disabled={true}
-          >
-            Add Teacher
-          </Button>
+        <div title="Read-Only Access" className="hidden md:flex">
+          {!!filters?.schoolId && (
+            <>
+              <button
+                onClick={handleOpenGradeFilter}
+                className="flex items-center justify-around px-3 h-10 text-gray-700 rounded-lg cursor-pointer border border-gray-200 bg-transparent"
+              >
+                <span className="text-sm font-medium">
+                  {classroomFilters.find((f) => f.isActive)?.label || "All Classrooms"}
+                </span>
+                <ExpandMoreIcon className="ml-2" />
+              </button>
+              <FilterPopover
+                open={Boolean(gradeAnchorEl)}
+                anchorEl={gradeAnchorEl}
+                onClose={() => setGradeAnchorEl(null)}
+                options={classroomFilters}
+                onSelect={handleClassroomFilterChange}
+                width={180}
+              />
+            </>
+          )}
         </div>
       </Box>
 

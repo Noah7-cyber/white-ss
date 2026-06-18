@@ -14,7 +14,7 @@ import ConfirmModal from "@/components/ConfirmModal/confirmModal";
 import WarnIcon from "@/modules/shared/assets/svgs/warnIcon.svg";
 import TrashIcon from "@/modules/shared/assets/svgs/trashicon.svg";
 import { showToast } from "@/modules/shared/component/Toast";
-import useAddChild from "./hook/useAddChild";
+import { useForm } from "react-hook-form";
 import ScrollableTabBar from "@/layout/Shared/ScrollableTabBar";
 import { useMediaQuery } from "@/utils/hooks/useMediaQuery";
 
@@ -52,7 +52,7 @@ export const ChildDetail: React.FC<ChildDetailProps> = ({ isEditMode = false }) 
   const [mobileStep, setMobileStep] = useState<MobileStep>("generalInfo");
   const [deactivateModal, setDeactivateModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
-  const { control } = useAddChild();
+  const { control } = useForm();
 
   const tabs = [
     { id: "profile", label: "Profile" },

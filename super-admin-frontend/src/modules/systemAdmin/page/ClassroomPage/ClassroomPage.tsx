@@ -4,7 +4,7 @@ import { Table } from "@/modules/shared/component/Table";
 import { PaginationControls } from "@/modules/shared/component/Pagination/Pagination";
 
 import { InsightCard } from "@/components/InsightCard";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 import useClassroomPage from "./hooks/useClassroomPage";
 
@@ -62,6 +62,13 @@ export default function ClassroomPage() {
 
   return (
     <Box className="flex flex-col gap-6">
+      <Box className="hidden w-full md:flex items-center justify-between gap-4">
+        <Typography className="font-semibold! text-xl! text-text-primary!">Classrooms</Typography>
+        <SchoolFilter
+          value={filters?.schoolId}
+          onChange={(schoolId) => applyFilters({ schoolId, pos: 0 })}
+        />
+      </Box>
       <div className="flex md:grid md:grid-cols-4 gap-4 overflow-x-auto md:overflow-x-visible hide-scrollbar sm:min-h-35 *:shrink-0 md:*:shrink">
         <InsightCard
           name="Active Classroom"
@@ -105,14 +112,6 @@ export default function ClassroomPage() {
           />
         </div>
         <div title="Read-Only Access">
-          <Button
-            className="rounded-lg! !hidden md:!flex"
-            startIcon={<PlusIcon />}
-            onClick={() => router.push("/admin/rooms/classes/add")}
-            disabled={true}
-          >
-            Add Classroom
-          </Button>
         </div>
       </Box>
 

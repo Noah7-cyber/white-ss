@@ -13,6 +13,7 @@ export interface RegisterFormValues {
   confirmPassword: string;
   role?: string;
   token?: string;
+  acceptTerms: boolean;
 }
 
 export const initialValue: RegisterFormValues = {
@@ -23,6 +24,7 @@ export const initialValue: RegisterFormValues = {
   password: "",
   confirmPassword: "",
   role: undefined,
+  acceptTerms: false,
 };
 
 export const validationSchema = Yup.object({
@@ -45,5 +47,8 @@ export const validationSchema = Yup.object({
     .required("Please confirm your password")
     .oneOf([Yup.ref("password")], "Passwords must match"),
   role: Yup.string(),
+  acceptTerms: Yup.boolean()
+    .oneOf([true], "You must accept the Terms and Conditions")
+    .required("You must accept the Terms and Conditions"),
 });
 

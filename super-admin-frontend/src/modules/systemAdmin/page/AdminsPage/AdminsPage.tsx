@@ -23,7 +23,7 @@ export default function AdminsPage() {
     <Box className="space-y-6 flex flex-col h-full p-4 md:p-5">
       <Box className="flex flex-wrap items-center justify-between gap-4">
         <Typography className="!text-2xl !font-means !text-secondary">
-          System Admins
+          Admins
         </Typography>
         <SchoolFilter
           value={filters.schoolId}
@@ -43,7 +43,7 @@ export default function AdminsPage() {
           <Table
             headers={["Admin ID", "Name", "Email", "Role"]}
             isLoading={isLoading}
-            data={adminsList.map((admin: { id: number, user: { firstName?: string, lastName?: string, email?: string, profile?: { photo?: string } }, role: string }) => [
+            tableData={adminsList.map((admin: { id: number, user: { firstName?: string, lastName?: string, email?: string, profile?: { photo?: string } }, role: string }) => [
               admin.id,
               <Box key={admin.id} className="flex items-center gap-3">
                 <InitialsAvatar

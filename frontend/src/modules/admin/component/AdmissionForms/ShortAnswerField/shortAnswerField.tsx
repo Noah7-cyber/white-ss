@@ -5,13 +5,16 @@ const ShortAnswerField = ({
   value,
   onChange,
   error,
+  type = "text",
 }: {
   value: string;
   onChange: (v: string) => void;
   error?: string;
+  type?: string;
 }) => {
   return (
     <TextField
+      type={type}
       fullWidth
       variant="standard"
       placeholder="Your answer"

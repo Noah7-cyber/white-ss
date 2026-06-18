@@ -23,6 +23,10 @@ const QuestionCard = ({
         return (
           <ShortAnswerField value={(value as string) ?? ""} onChange={onChange} error={error} />
         );
+      case "date":
+        return (
+          <ShortAnswerField type="date" value={(value as string) ?? ""} onChange={onChange} error={error} />
+        );
       case "long_answer":
         return (
           <LongAnswerField value={(value as string) ?? ""} onChange={onChange} error={error} />

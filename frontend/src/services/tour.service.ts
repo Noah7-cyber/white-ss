@@ -243,14 +243,36 @@ export type SendOfferPayload = SendOfferPayloadBase &
 
 export interface SendOfferPayloadBase {
   parent: {
+    title?: string;
     firstName: string;
     lastName: string;
+    relationship?: string;
+    phone?: string;
+    email?: string;
+    address?: string;
   };
   students: {
     firstName: string;
     lastName: string;
+    middleName?: string;
     classroomId: number | string;
     dateOfBirth: string;
+    dateOfEnrolment?: string;
+    address?: string;
+    schedule?: string[];
+    allergies?: string;
+    medications?: string;
+    foodPreferences?: string;
+    dietRestrictions?: string;
+    notes?: string;
+    emergencyTitle?: string;
+    emergencyFirstName?: string;
+    emergencyLastName?: string;
+    emergencyRelationship?: string;
+    emergencyPhone?: string;
+    emergencyEmail?: string;
+    emergencyAddress?: string;
+    documents?: { type: string; url: string; originalName: string }[];
   }[];
   items: {
     description: string;

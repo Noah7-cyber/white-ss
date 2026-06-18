@@ -28,6 +28,7 @@ export function useParents() {
     search: "",
     delta: ITEMS_PER_PAGE,
     pos: 0,
+    schoolId: undefined,
   });
 
   const STATUS_CONSTANT: Record<string, { chip: string }> = {
@@ -56,6 +57,9 @@ export function useParents() {
   } = useInfiniteQueryService<any, any>({
     service: {
       ...classroomServices.getAllClassrooms,
+      data: {
+        ...(filters?.schoolId ? { schoolId: filters?.schoolId } : {}),
+      },
     },
   });
 
@@ -66,7 +70,7 @@ export function useParents() {
   const classRoomOptions = useMemo(() => {
     const list =
       classRoomData?.pages?.reduce<any[]>((acc, page) => {
-        return acc.concat(page?.classrooms ?? page?.data ?? []);
+        return acc.concat(page?.data?.classrooms ?? page?.classrooms ?? page?.data ?? []);
       }, []) ?? [];
     const options = [{ label: "All Classrooms", value: ALL_CLASSROOMS_VALUE }];
     list.forEach((c: any) => {
@@ -123,6 +127,7 @@ export function useParents() {
       data: {
         ...(classroomIdParam != null ? { classroomId: classroomIdParam } : {}),
         ...(statusParam ? { status: statusParam } : {}),
+        ...(filters?.schoolId ? { schoolId: filters?.schoolId } : {}),
         pos: filters?.pos ?? 0,
         sortBy: "lastName",
         sortOrder: "DESC",
@@ -131,7 +136,7 @@ export function useParents() {
       },
     },
     options: {
-      keys: ["parents", selectedClassRoomFilter, selectedStatusFilter, filters?.pos, filters?.delta],
+      keys: ["parents", selectedClassRoomFilter, selectedStatusFilter, filters?.pos, filters?.delta, filters?.schoolId],
     },
   });
 
@@ -217,8 +222,10 @@ export function useParents() {
     handlePageChange,
     getStatusConfig,
     handleSearch,
-    hasPermission,
     handleExport,
     isExporting,
+    filters,
+    applyFilters,
+    hasPermission,
   };
 }

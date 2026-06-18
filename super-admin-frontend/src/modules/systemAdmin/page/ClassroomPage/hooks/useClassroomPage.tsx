@@ -5,7 +5,7 @@ import { ITEMS_PER_PAGE } from "@/constants";
 import ClassroomRowActions from "@/modules/admin/component/ClassroomRowActions";
 import { showToast } from "@/modules/shared/component/Toast";
 import { DashboardRoutes } from "@/routes/dashboard.routes";
-import { systemAdminClassroomDynamicEndpoints as classroomDynamicEndpoints, systemAdminClassroomServices as classroomServices } from "@/services/system-admin-classroom.service";
+import { systemAdminClassroomServices as classroomServices } from "@/services/system-admin-classroom.service";
 
 import { useFilter } from "@/utils/hooks/useFilter";
 import { useMutationService } from "@/utils/hooks/useMutationService";
@@ -47,7 +47,7 @@ const useClassroomPage = () => {
   };
 
   const {
-    data: { classrooms: classroomList = [], pagination = {} } = {} as any,
+    data: queryData,
     isLoading,
     refetch,
   } = useQueryService<any, any>({
@@ -64,6 +64,9 @@ const useClassroomPage = () => {
       },
     },
   });
+
+  const classroomList = queryData?.data?.classrooms || queryData?.classrooms || [];
+  const pagination = queryData?.data?.pagination || queryData?.pagination || {};
 
   const { mutateAsync: getClassrooms } = useMutationService({
     service: classroomServices.getAllClassrooms,
@@ -84,8 +87,8 @@ const useClassroomPage = () => {
         sortBy: "level",
         sortOrder: "ASC",
       });
-      const firstList = firstRes?.classrooms || firstRes?.data || [];
-      const totalCount = firstRes?.pagination?.count || firstList.length;
+      const firstList = firstRes?.data?.classrooms || firstRes?.classrooms || firstRes?.data || [];
+      const totalCount = firstRes?.data?.pagination?.count || firstRes?.pagination?.count || firstList.length;
       if (Array.isArray(firstList)) merged = [...firstList];
       if (totalCount > DELTA) {
         const totalPages = Math.ceil(totalCount / DELTA);
@@ -102,7 +105,7 @@ const useClassroomPage = () => {
         }
         const pages = await Promise.all(promises);
         pages.forEach((res: any) => {
-          const list = res?.classrooms || res?.data || [];
+          const list = res?.data?.classrooms || res?.classrooms || res?.data || [];
           if (Array.isArray(list)) merged = [...merged, ...list];
         });
       }
@@ -116,70 +119,10 @@ const useClassroomPage = () => {
     fetchAllClassroomsMetrics();
   }, [fetchAllClassroomsMetrics]);
 
-  /** ---- DELETE ---- */
-  const { mutateAsync: deleteClassroomAsync } = useMutationService({
-    service: classroomDynamicEndpoints.deleteClassroom(selectedClassroomIdx!),
-  });
+  /** ---- STATUS TOGGLE (DISABLED FOR SYSTEM ADMIN) ---- */
 
-  const { mutateAsync: changeClassroomStatusAsync } = useMutationService({
-    service: classroomDynamicEndpoints.changeClassroomStatus(selectedClassroomIdx!),
-  });
-
-  const handleDelete = async () => {
-    if (!selectedClassroomIdx) return;
-    if (!ensurePermission("classroom", "delete")) return;
-
-    try {
-      await deleteClassroomAsync({});
-      showToast({
-        message: "Classroom Deleted",
-        description: "The classroom has been successfully deleted.",
-        severity: "success",
-        duration: 3000,
-      });
-      setDeleteModalOpen(false);
-      refetch();
-      fetchAllClassroomsMetrics();
-    } catch (error: any) {
-      showToast({
-        message: "Error",
-        description: error?.response?.data?.message || "Unable to delete classroom.",
-        severity: "error",
-        duration: 3000,
-      });
-    }
-  };
-
-  /** ---- STATUS TOGGLE ---- */
-  const handleDeactivate = async () => {
-    if (!selectedClassroomIdx) return;
-    if (!ensurePermission("classroom", "update")) return;
-
-    try {
-      const nextStatus = selectedClassroomStatus === "inactive" ? "active" : "inactive";
-      await changeClassroomStatusAsync({ status: nextStatus, classroomStatus: nextStatus });
-      showToast({
-        message:
-          nextStatus === "active" ? "Classroom Activated" : "Classroom Deactivated",
-        description:
-          nextStatus === "active"
-            ? "The classroom has been successfully activated."
-            : "The classroom has been successfully deactivated.",
-        severity: "success",
-        duration: 3000,
-      });
-      setDeactivateModalOpen(false);
-      refetch();
-      fetchAllClassroomsMetrics();
-    } catch (error: any) {
-      showToast({
-        message: "Error",
-        description: error?.response?.data?.message || "Unable to deactivate classroom.",
-        severity: "error",
-        duration: 3000,
-      });
-    }
-  };
+  const handleDelete = async () => {};
+  const handleDeactivate = async () => {};
 
   /** ---- ROW ACTIONS ---- */
   const renderRowActions = (classroom: any) => (

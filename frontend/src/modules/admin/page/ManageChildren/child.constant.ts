@@ -170,11 +170,11 @@ export const childValidationSchema = Yup.object().shape({
     notes: Yup.string(),
   }),
   emergencyInfo: Yup.object().shape({
-    firstName: Yup.string().required("Emergency first name is required"),
-    lastName: Yup.string().required("Emergency last name is required"),
-    address: Yup.string().required("Address is required"),
-    email: Yup.string().email("Invalid email").required("Emergency email is required"),
-    phone: Yup.string().required("Emergency phone is required"),
+    firstName: Yup.string().optional(),
+    lastName: Yup.string().optional(),
+    address: Yup.string().optional(),
+    email: Yup.string().email("Invalid email").optional(),
+    phone: Yup.string().optional(),
   }),
   parents: Yup.array().of(
     Yup.object().shape({

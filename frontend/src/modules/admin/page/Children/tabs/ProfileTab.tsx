@@ -7,7 +7,7 @@ import React from "react";
 // import { Dropdown } from "react-chat-elements";
 import { Dropdown } from "@/modules/shared/component/Dropdown";
 import { classroomOptions, relationshipOptions } from "../child.constant";
-import { Control } from "react-hook-form";
+import { Control, Controller } from "react-hook-form";
 import { CWDropdown } from "@/modules/shared/component/FormFields/CWDropdown";
 
 export default function ProfileTab({
@@ -15,18 +15,22 @@ export default function ProfileTab({
   handleImageUpload,
   selectedImage,
   mobileSection,
+  prefix,
+  hideEmergency,
 }: {
   control: Control<any>;
   handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   selectedImage: string | null;
-  /** When set, only the specified section renders (mobile flow). Undefined = show all (desktop). */
   mobileSection?: "general" | "medical" | "emergency";
+  prefix?: string;
+  hideEmergency?: boolean;
 }) {
+  const p = (name: string) => (prefix ? `${prefix}${name}` : name);
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
   const showGeneral = !mobileSection || mobileSection === "general";
   const showMedical = !mobileSection || mobileSection === "medical";
-  const showEmergency = !mobileSection || mobileSection === "emergency";
+  const showEmergency = (!mobileSection || mobileSection === "emergency") && !hideEmergency;
 
   return (
     <Box className="flex flex-col !bg-white !px-4 md:!px-5 rounded-xl">
@@ -93,7 +97,7 @@ export default function ProfileTab({
         <Box className="flex flex-col md:flex-row gap-3 w-full">
           <CWTextField
             control={control}
-            name="firstName"
+            name={p("firstName")}
             label="First name"
             placeholder="Enter first name"
             labelOnTop
@@ -103,7 +107,7 @@ export default function ProfileTab({
           />
           <CWTextField
             control={control}
-            name="lastName"
+            name={p("lastName")}
             label="Last name"
             placeholder="Enter last name"
             labelOnTop
@@ -113,7 +117,7 @@ export default function ProfileTab({
           />
           <CWTextField
             control={control}
-            name="middleName"
+            name={p("middleName")}
             label="Middle name"
             placeholder="Enter middle name"
             labelOnTop
@@ -126,7 +130,7 @@ export default function ProfileTab({
         <Box className="flex flex-col md:flex-row gap-3 w-full">
           <CWTextField
             control={control}
-            name="dateOfBirth"
+            name={p("dateOfBirth")}
             label="Date of birth"
             placeholder="dd/mm/yyyy"
             type="date"
@@ -137,7 +141,7 @@ export default function ProfileTab({
           />
           <CWTextField
             control={control}
-            name="dateOfEnrolment"
+            name={p("dateOfEnrolment")}
             label="Date of enrolment"
             placeholder="dd/mm/yyyy"
             type="date"
@@ -146,7 +150,9 @@ export default function ProfileTab({
             inputClasses="mt-1 !text-sm !h-10 !text-input-gray"
             className="flex-1"
           />
-          <Dropdown
+          <CWDropdown
+            control={control}
+            name={p("classroom")}
             options={classroomOptions}
             isForm
             textFieldProps={{
@@ -163,7 +169,7 @@ export default function ProfileTab({
         <Box className="">
           <CWTextField
             control={control}
-            name="address"
+            name={p("address")}
             label=" Address"
             placeholder="Enter full address"
             labelOnTop
@@ -178,22 +184,42 @@ export default function ProfileTab({
         <Box>
           <Typography className="!font-normal  !text-sm !text-primary-dark">Schedule</Typography>
           <Box className="flex flex-wrap gap-6">
-            {days.map((day) => (
-              <FormControlLabel
-                key={day}
-                control={
-                  <Checkbox
-                    sx={{
-                      color: "#D0D5DD",
-                      "&.Mui-checked": {
-                        color: "#008080",
-                      },
-                    }}
-                  />
-                }
-                label={<span className="text-sm text-[#344054]">{day}</span>}
-              />
-            ))}
+            <Controller
+              control={control}
+              name={p("schedule")}
+              defaultValue={[]}
+              render={({ field: { value = [], onChange } }) => (
+                <>
+                  {days.map((day) => {
+                    const isChecked = Array.isArray(value) && value.includes(day);
+                    return (
+                      <FormControlLabel
+                        key={day}
+                        control={
+                          <Checkbox
+                            checked={isChecked}
+                            onChange={(e) => {
+                              const current = Array.isArray(value) ? value : [];
+                              const newSchedule = e.target.checked
+                                ? [...current, day]
+                                : current.filter((d) => d !== day);
+                              onChange(newSchedule);
+                            }}
+                            sx={{
+                              color: "#D0D5DD",
+                              "&.Mui-checked": {
+                                color: "#008080",
+                              },
+                            }}
+                          />
+                        }
+                        label={<span className="text-sm text-[#344054]">{day}</span>}
+                      />
+                    );
+                  })}
+                </>
+              )}
+            />
           </Box>
         </Box>
       </Grid>
@@ -208,7 +234,7 @@ export default function ProfileTab({
           <Box className="flex flex-col md:flex-row gap-3">
             <CWTextArea
               control={control}
-              name="allergies"
+              name={p("allergies")}
               label="Allergies"
               placeholder="Enter brief description..."
               rows={3}
@@ -219,7 +245,7 @@ export default function ProfileTab({
             />
             <CWTextArea
               control={control}
-              name="medications"
+              name={p("medications")}
               label="Medications"
               placeholder="Enter brief description..."
               rows={3}
@@ -232,7 +258,7 @@ export default function ProfileTab({
           <Box className="flex flex-col md:flex-row gap-3">
             <CWTextArea
               control={control}
-              name="foodPreferences"
+              name={p("foodPreferences")}
               label="Food preferences"
               placeholder="Enter brief description..."
               rows={3}
@@ -243,7 +269,7 @@ export default function ProfileTab({
             />
             <CWTextArea
               control={control}
-              name="dietRestrictions"
+              name={p("dietRestrictions")}
               label="Diet Restrictions"
               placeholder="Enter brief description..."
               rows={3}
@@ -255,7 +281,7 @@ export default function ProfileTab({
           </Box>
           <CWTextArea
             control={control}
-            name="notes"
+            name={p("notes")}
             label="Notes"
             placeholder="Enter brief description..."
             rows={3}
@@ -277,7 +303,7 @@ export default function ProfileTab({
           <Box className="flex flex-col md:flex-row gap-3">
             <Box className="md:flex-shrink-0 md:max-w-[140px]">
               <CWDropdown
-                name="name"
+                name={p("emergencyTitle")}
                 control={control}
                 options={["Miss", "Mrs", "Mr"]}
                 isForm
@@ -295,7 +321,7 @@ export default function ProfileTab({
             </Box>
             <CWTextField
               control={control}
-              name="first_name"
+              name={p("emergencyFirstName")}
               label="First Name"
               placeholder="Enter full name"
               labelOnTop
@@ -305,7 +331,7 @@ export default function ProfileTab({
             />
             <CWTextField
               control={control}
-              name="last_name"
+              name={p("emergencyLastName")}
               label="Last Name"
               placeholder="Enter last name"
               labelOnTop
@@ -317,7 +343,7 @@ export default function ProfileTab({
           <Box className="flex flex-col md:flex-row gap-3">
             <CWDropdown
               control={control}
-              name="relationship"
+              name={p("emergencyRelationship")}
               options={relationshipOptions}
               isForm
               textFieldProps={{
@@ -331,7 +357,7 @@ export default function ProfileTab({
             />
             <CWTextField
               control={control}
-              name="phone_number"
+              name={p("emergencyPhone")}
               label="Phone Number"
               placeholder="Enter Phone number"
               labelOnTop
@@ -341,7 +367,7 @@ export default function ProfileTab({
             />
             <CWTextField
               control={control}
-              name="email"
+              name={p("emergencyEmail")}
               label="Email Address"
               type="email"
               placeholder="Enter Email Address"
@@ -355,7 +381,7 @@ export default function ProfileTab({
           <Box className="flex flex-col gap-4">
             <CWTextField
               control={control}
-              name="address"
+              name={p("emergencyAddress")}
               label=" Address"
               placeholder="Enter full address"
               labelOnTop

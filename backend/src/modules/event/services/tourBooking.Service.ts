@@ -1238,14 +1238,36 @@ export class TourBookingService {
     bookedTourId?: number;
     formResponseId?: number;
     parent: {
+      title?: string;
       firstName: string;
       lastName: string;
+      relationship?: string;
+      phone?: string;
+      email?: string;
+      address?: string;
     };
     students: Array<{
       firstName: string;
       lastName: string;
+      middleName?: string;
       classroomId: number;
       dateOfBirth: string;
+      dateOfEnrolment?: string;
+      address?: string;
+      schedule?: string[];
+      allergies?: string;
+      medications?: string;
+      foodPreferences?: string;
+      dietRestrictions?: string;
+      notes?: string;
+      emergencyTitle?: string;
+      emergencyFirstName?: string;
+      emergencyLastName?: string;
+      emergencyRelationship?: string;
+      emergencyPhone?: string;
+      emergencyEmail?: string;
+      emergencyAddress?: string;
+      documents?: { type: string; url: string; originalName: string }[];
     }>;
     items: Array<{
       description: string;
@@ -1350,10 +1372,10 @@ export class TourBookingService {
         const parentResult = await authService.registerParentViaAdmin({
           firstName: data.parent.firstName,
           lastName: data.parent.lastName,
-          email: fromTour ? booking!.email! : formResponse!.email!,
-          phone: undefined,
-          address: undefined,
-          suffix: undefined,
+          email: data.parent.email || (fromTour ? booking!.email! : formResponse!.email!),
+          phone: data.parent.phone || undefined,
+          address: data.parent.address || undefined,
+          suffix: data.parent.title || undefined,
           tempPassword: true,
           role: UserRole.PARENT,
           schoolId: data.schoolId
@@ -1371,7 +1393,7 @@ export class TourBookingService {
         const { ParentStatus } = await import("../../shared/entities/EntityEnums");
         parentEntity = await parentService.createParent({
           userId: parentUserId,
-          relationship: RelationshipType.GUARDIAN, // Default relationship
+          relationship: data.parent.relationship as any || RelationshipType.GUARDIAN,
           schoolId: data.schoolId,
           status: ParentStatus.INACTIVE // Set to INACTIVE when created via sendOffer
         }, { manager: queryRunner.manager });
@@ -1411,6 +1433,8 @@ export class TourBookingService {
         const studentUserResult = await profileService.createUser({
           firstName: studentData.firstName,
           lastName: studentData.lastName,
+          middleName: studentData.middleName || undefined,
+          address: studentData.address || undefined,
           dateOfBirth: studentData.dateOfBirth,
           role: UserRole.STUDENT,
           schoolId: data.schoolId,
@@ -1437,7 +1461,8 @@ export class TourBookingService {
           userId: studentUserResult.id,
           schoolId: data.schoolId,
           classroomId: studentData.classroomId,
-          enrolmentDate: new Date(),
+          enrolmentDate: studentData.dateOfEnrolment ? new Date(studentData.dateOfEnrolment) : new Date(),
+          schedule: studentData.schedule || undefined,
           admissionNumber: admissionNumber,
           status: StudentStatus.INACTIVE,
           tourBookingId: fromTour ? booking!.id : undefined,
@@ -1446,6 +1471,49 @@ export class TourBookingService {
 
         // Link student to parent
         await parentService.attachParentToStudent(studentEntity.id, parentEntity.id, { manager: queryRunner.manager });
+
+        // Create Medical record if applicable
+        if (studentData.allergies || studentData.medications || studentData.foodPreferences || studentData.dietRestrictions || studentData.notes) {
+          const { Medical } = await import("../../shared/entities/Medical");
+          const medicalRecord = queryRunner.manager.create(Medical, {
+            studentId: studentEntity.id,
+            allergies: studentData.allergies,
+            medications: studentData.medications,
+            foodPreferences: studentData.foodPreferences,
+            dietRestriction: studentData.dietRestrictions,
+            notes: studentData.notes,
+          });
+          await queryRunner.manager.save(Medical, medicalRecord);
+        }
+
+        // Create Emergency record if applicable
+        if (studentData.emergencyFirstName || studentData.emergencyLastName || studentData.emergencyPhone) {
+          const { Emergency } = await import("../../shared/entities/Emergency");
+          const emergencyRecord = queryRunner.manager.create(Emergency, {
+            studentId: studentEntity.id,
+            suffix: studentData.emergencyTitle as any,
+            contactName: `${studentData.emergencyFirstName || ''} ${studentData.emergencyLastName || ''}`.trim(),
+            relationship: studentData.emergencyRelationship as any,
+            phone: studentData.emergencyPhone,
+            email: studentData.emergencyEmail,
+            address: studentData.emergencyAddress,
+          });
+          await queryRunner.manager.save(Emergency, emergencyRecord);
+        }
+
+        // Create Document records if applicable
+        if (studentData.documents && studentData.documents.length > 0) {
+          const { StudentDocument } = await import("../../shared/entities/StudentDocument");
+          for (const doc of studentData.documents) {
+            const docRecord = queryRunner.manager.create(StudentDocument, {
+              studentId: studentEntity.id,
+              type: doc.type,
+              url: doc.url,
+              originalName: doc.originalName,
+            });
+            await queryRunner.manager.save(StudentDocument, docRecord);
+          }
+        }
 
         // Reload student with relations
         const studentWithRelations = await queryRunner.manager.findOne(Student, {

@@ -83,3 +83,9 @@ SUBJECT_CLASSROOM_STAFF_REFACTORING_COMPLETE.md
 deploy.sh
 .env.production
 .nginx
+
+# Test scripts
+test-list-*.ts
+scripts/seed-*.ts
+scripts/link-*.ts
+SEED_TEST_DATA_README.md

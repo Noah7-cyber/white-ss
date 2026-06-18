@@ -389,11 +389,9 @@ export default function RoomLayout({ children }: RoomLayoutProps) {
         ) : null}
       </Box>
 
-      {/* Tabs */}
       <ScrollableTabBar className="border-b! border-border-lighten!">
         {[
           { href: "/admin/rooms/classes", label: "Classes" },
-          { href: "/admin/rooms/activities", label: "Activities" },
         ].map((tab) => {
           const active = pathname === tab.href;
           return (

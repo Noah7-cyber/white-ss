@@ -6,11 +6,14 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import RadioIcon from "@/modules/shared/assets/svgs/checkdot.svg";
 import CheckBox from "@/modules/shared/assets/svgs/checkbox-outline.svg";
 
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+
 const QUESTION_TYPES = [
     { value: "short", label: "Short answer", icon: <ShortTextIcon className="w-5 h-5" /> },
     { value: "long", label: "Long answer", icon: <NotesIcon className="w-5 h-5" /> },
     { value: "multiple", label: "Multiple choice", icon: <RadioIcon /> },
     { value: "checkbox", label: "Checkboxes", icon: <CheckBox /> },
+    { value: "date", label: "Date", icon: <CalendarTodayIcon className="w-5 h-5" /> },
     { value: "image_upload", label: "Image upload", icon: <ImageIcon className="w-5 h-5" /> },
     { value: "file_upload", label: "File upload", icon: <UploadFileIcon className="w-5 h-5" /> },
 ];

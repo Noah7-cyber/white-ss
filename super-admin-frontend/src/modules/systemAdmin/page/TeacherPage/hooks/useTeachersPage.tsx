@@ -26,8 +26,13 @@ const useTeachersPage = () => {
     pos: 0,
     schoolId: undefined,
   });
+  const [gradeAnchorEl, setGradeAnchorEl] = useState<HTMLElement | null>(null);
+  const handleOpenGradeFilter = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setGradeAnchorEl(event.currentTarget);
+  };
   const router = useRouter();
   const [classrooms, setClassrooms] = useState<any[]>([]);
+  const [selectedClassroomFilter, setSelectedClassroomFilter] = useState("all");
   const { debouncedSearch, setSearch } = useDebouncer();
   const { hasPermission, ensurePermission } = usePermissionGuide({ enabled: true });
 
@@ -50,6 +55,7 @@ const useTeachersPage = () => {
         ...(filters?.delta ? { delta: filters?.delta } : {}),
         ...(filters?.pos ? { pos: filters?.pos } : {}),
         ...(filters?.schoolId ? { schoolId: filters?.schoolId } : {}),
+        ...(selectedClassroomFilter !== "all" ? { classroomId: selectedClassroomFilter } : {}),
         search: debouncedSearch,
         sortBy: "firstName",
       },
@@ -111,6 +117,23 @@ const useTeachersPage = () => {
     });
     return map;
   }, [classrooms]);
+
+  const classroomFilters = useMemo(
+    () => [
+      { label: "All Classrooms", value: "all", isActive: selectedClassroomFilter === "all" },
+      ...classrooms.map((c: any) => ({
+        label: c.classroomName || c.name,
+        value: String(c.id),
+        isActive: selectedClassroomFilter === String(c.id),
+      })),
+    ],
+    [classrooms, selectedClassroomFilter],
+  );
+
+  const handleClassroomFilterChange = (value: string) => {
+    setSelectedClassroomFilter(value);
+    applyFilters({ ...filters, pos: 0 });
+  };
 
   const fetchAllTeachersMetrics = useCallback(async () => {
     try {
@@ -280,6 +303,12 @@ const useTeachersPage = () => {
     router,
     selectedFilter,
     setSelectedFilter,
+    gradeAnchorEl,
+    setGradeAnchorEl,
+    handleOpenGradeFilter,
+    selectedClassroomFilter,
+    handleClassroomFilterChange,
+    classroomFilters,
     currentPage,
     filters,
     applyFilters,

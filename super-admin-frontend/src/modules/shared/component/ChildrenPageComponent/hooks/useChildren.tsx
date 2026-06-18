@@ -17,6 +17,7 @@ import { unwrapQueryDataBody } from "@/utils/unwrapQueryResponse";
 import { useMutationService } from "@/utils/hooks/useMutationService";
 import { ITEMS_PER_PAGE } from "@/constants";
 import { classroomServices } from "@/services/classroom.service";
+import { systemAdminClassroomServices } from "@/services/system-admin-classroom.service";
 import { useFilter } from "@/utils/hooks/useFilter";
 import { useUser } from "@/utils/hooks/useUser";
 import { StaffRoutes } from "@/routes/staff.routes";
@@ -72,6 +73,7 @@ export const useChildren = (role: "admin" | "staff") => {
     search: "",
     delta: ITEMS_PER_PAGE,
     pos: 0,
+    schoolId: undefined,
   });
   const { debouncedSearch, setSearch } = useDebouncer();
 
@@ -160,6 +162,7 @@ export const useChildren = (role: "admin" | "staff") => {
         sortOrder: "ASC",
         ...(filters?.delta ? { delta: filters?.delta } : {}),
         ...(filters?.pos ? { pos: filters?.pos } : {}),
+        ...(filters?.schoolId ? { schoolId: filters?.schoolId } : {}),
         ...(selectedClassroomFilter && selectedClassroomFilter !== "all"
           ? { classroomId: selectedClassroomFilter }
           : {}),
@@ -171,6 +174,7 @@ export const useChildren = (role: "admin" | "staff") => {
       keys: [
         "children",
         role,
+        filters?.schoolId,
         selectedClassroomFilter,
         filters?.pos ?? 0,
         filters?.delta ?? ITEMS_PER_PAGE,
@@ -203,6 +207,7 @@ export const useChildren = (role: "admin" | "staff") => {
         status: "active",
         delta: 1,
         pos: 0,
+        ...(filters?.schoolId ? { schoolId: filters?.schoolId } : {}),
         ...(selectedClassroomFilter && selectedClassroomFilter !== "all"
           ? { classroomId: selectedClassroomFilter }
           : {}),
@@ -210,7 +215,7 @@ export const useChildren = (role: "admin" | "staff") => {
       },
     },
     options: {
-      keys: ["children-active-count", role, selectedClassroomFilter],
+      keys: ["children-active-count", role, filters?.schoolId, selectedClassroomFilter],
     },
   });
 
@@ -241,6 +246,9 @@ export const useChildren = (role: "admin" | "staff") => {
         sortOrder: "ASC",
       };
       if (debouncedSearch) params.search = debouncedSearch;
+      if (filters?.schoolId) {
+        params.schoolId = filters.schoolId;
+      }
       if (selectedClassroomFilter && selectedClassroomFilter !== "all") {
         params.classroomId = selectedClassroomFilter;
       }
@@ -286,15 +294,18 @@ export const useChildren = (role: "admin" | "staff") => {
     isLoading: isLoadingClassrooms,
   } = useInfiniteQueryService<any, any>({
     service: {
-      ...classroomServices.getAllClassrooms,
-      data: role === "staff" && staffId != null ? { staffId } : {},
+      ...(role === "admin" ? systemAdminClassroomServices.getAllClassrooms : classroomServices.getAllClassrooms),
+      data: {
+        ...(role === "staff" && staffId != null ? { staffId } : {}),
+        ...(filters?.schoolId ? { schoolId: filters?.schoolId } : {}),
+      },
     },
   });
 
   const allClassrooms = useMemo(
     () =>
       classRoomData?.pages?.reduce<any[]>((acc, page) => {
-        return acc.concat(page?.classrooms ?? page?.data ?? []);
+        return acc.concat(page?.data?.classrooms ?? page?.classrooms ?? page?.data ?? []);
       }, []) ?? [],
     [classRoomData],
   );

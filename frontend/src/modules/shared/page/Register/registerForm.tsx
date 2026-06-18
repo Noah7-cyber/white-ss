@@ -1,6 +1,7 @@
 "use client";
 
-import { Box, Typography, Link } from "@mui/material";
+import { Box, Typography, Link, Checkbox, FormControlLabel, FormHelperText } from "@mui/material";
+import { Controller } from "react-hook-form";
 import { CWTextField } from "@/modules/shared/component/FormFields/CWTextField";
 import { useRegister } from "./hook/useRegister";
 import { Button } from "@/modules/shared/component/Button";
@@ -152,6 +153,45 @@ const RegisterForm = () => {
             labelClassName="!text-sm !font-medium !text-input-gray"
             inputClasses="mt-1 !text-sm !h-10 !text-input-gray placeholder:!text-input-gray"
             className="flex-1"
+          />
+
+          <Controller
+            name="acceptTerms"
+            control={control}
+            render={({ field: { value, onChange }, fieldState: { error } }) => (
+              <Box className="flex flex-col mt-1 mb-2">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={!!value}
+                      onChange={(e) => onChange(e.target.checked)}
+                      size="small"
+                      sx={{
+                        color: "#D0D5DD",
+                        "&.Mui-checked": {
+                          color: "#008080",
+                        },
+                      }}
+                    />
+                  }
+                  label={
+                    <Typography className="!text-xs !text-text-gray">
+                      I accept the{" "}
+                      <Link href="https://whitepenguin.co/terms/" target="_blank" className="!text-brandColor-active !font-medium !no-underline hover:underline">Terms of Service</Link>,{" "}
+                      <Link href="https://whitepenguin.co/privacy-policy-3/" target="_blank" className="!text-brandColor-active !font-medium !no-underline hover:underline">Privacy Policy</Link>,{" "}
+                      Service Level Agreement (SLA), and Data Processing Agreement (DPA).
+                    </Typography>
+                  }
+                  className="!m-0 !items-start"
+                  sx={{ "& .MuiFormControlLabel-label": { mt: "2px" }, "& .MuiCheckbox-root": { py: 0, px: 1, pl: 0 } }}
+                />
+                {error && (
+                  <FormHelperText error className="!ml-0 !mt-1">
+                    {error.message}
+                  </FormHelperText>
+                )}
+              </Box>
+            )}
           />
 
           <Button

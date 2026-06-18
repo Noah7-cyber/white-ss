@@ -120,6 +120,20 @@ const FormResponseDetailModal: React.FC<FormResponseDetailModalProps> = ({
           {heroTitle}
         </h1>
         <p className="mb-2 border-b border-gray-300 pb-5 text-sm text-gray-500">{heroSubtext}</p>
+        
+        {response && response.status !== "Withdrawn" && (
+          <div className="flex justify-center mb-4 pb-4 border-b border-gray-200">
+            <button
+              onClick={() => {
+                onClose();
+                window.location.href = `/admin/children/add?formResponseId=${response.id}`;
+              }}
+              className="rounded-md bg-brandColor-active px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90"
+            >
+              Merge / Create Child Record
+            </button>
+          </div>
+        )}
       </div>
 
       {isLoading ? (

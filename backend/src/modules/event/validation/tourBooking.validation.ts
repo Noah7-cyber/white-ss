@@ -163,6 +163,12 @@ export const sendOfferValidation = [
         .isString().withMessage("parent.lastName must be a string")
         .isLength({ max: 50 }).withMessage("parent.lastName must not exceed 50 characters"),
 
+    body("parent.title").optional().isString(),
+    body("parent.relationship").optional().isString(),
+    body("parent.phone").optional().isString(),
+    body("parent.email").optional().isEmail(),
+    body("parent.address").optional().isString(),
+
     body("students")
         .notEmpty().withMessage("students is required")
         .isArray({ min: 1 }).withMessage("students must be a non-empty array"),
@@ -177,6 +183,8 @@ export const sendOfferValidation = [
         .isString().withMessage("Student last name must be a string")
         .isLength({ max: 50 }).withMessage("Student last name must not exceed 50 characters"),
 
+    body("students.*.middleName").optional().isString(),
+
     body("students.*.classroomId")
         .notEmpty().withMessage("Student classroomId is required")
         .isInt({ min: 1 }).withMessage("Student classroomId must be a positive integer"),
@@ -184,6 +192,23 @@ export const sendOfferValidation = [
     body("students.*.dateOfBirth")
         .notEmpty().withMessage("Student dateOfBirth is required")
         .isISO8601().withMessage("Student dateOfBirth must be a valid ISO 8601 date"),
+
+    body("students.*.dateOfEnrolment").optional().isString(),
+    body("students.*.address").optional().isString(),
+    body("students.*.schedule").optional().isArray(),
+    body("students.*.allergies").optional().isString(),
+    body("students.*.medications").optional().isString(),
+    body("students.*.foodPreferences").optional().isString(),
+    body("students.*.dietRestrictions").optional().isString(),
+    body("students.*.notes").optional().isString(),
+    body("students.*.emergencyTitle").optional().isString(),
+    body("students.*.emergencyFirstName").optional().isString(),
+    body("students.*.emergencyLastName").optional().isString(),
+    body("students.*.emergencyRelationship").optional().isString(),
+    body("students.*.emergencyPhone").optional().isString(),
+    body("students.*.emergencyEmail").optional().isEmail(),
+    body("students.*.emergencyAddress").optional().isString(),
+    body("students.*.documents").optional().isArray(),
 
     body("items")
         .notEmpty().withMessage("items is required")

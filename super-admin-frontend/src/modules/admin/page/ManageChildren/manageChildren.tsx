@@ -14,7 +14,7 @@ import { ParentTab } from "./tabs/ParentTab";
 import DocumentTab from "./tabs/DocumentTab";
 import useManageChild from "./hook/useManageChildren";
 import { FC, useState } from "react";
-import { AddChildTab } from "../Children/hook/useAddChild";
+type AddChildTab = "profile" | "parent" | "documents";
 import { DataRenderer } from "@/modules/shared/component/DataRenderer";
 import ScrollableTabBar from "@/layout/Shared/ScrollableTabBar";
 import { useMediaQuery } from "@/utils/hooks/useMediaQuery";

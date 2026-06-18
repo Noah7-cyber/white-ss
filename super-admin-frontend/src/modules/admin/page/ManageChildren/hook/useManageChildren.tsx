@@ -21,7 +21,7 @@ import {
   type GetChildByIdResponse,
 } from "@/services/child.service";
 import { showToast } from "@/modules/shared/component/Toast";
-import type { AddChildTab } from "../../Children/hook/useAddChild";
+type AddChildTab = "profile" | "parent" | "documents";
 import { DashboardRoutes } from "@/routes/dashboard.routes";
 
 function getTabForPath(path: string): AddChildTab {

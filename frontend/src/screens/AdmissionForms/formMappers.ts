@@ -17,6 +17,7 @@ export function internalTypeToApiType(type: string): FormQuestionTypeApi {
     checkbox: FORM_QUESTION_TYPE.CHECKBOX,
     image_upload: FORM_QUESTION_TYPE.IMAGE_UPLOAD,
     file_upload: FORM_QUESTION_TYPE.FILE_UPLOAD,
+    date: FORM_QUESTION_TYPE.DATE,
   };
   return map[type] ?? FORM_QUESTION_TYPE.SHORT_ANSWER;
 }
@@ -30,6 +31,7 @@ export function apiTypeToInternalType(apiType: string): string {
     checkbox: "checkbox",
     image_upload: "image_upload",
     file_upload: "file_upload",
+    date: "date",
   };
   return map[apiType] ?? "short";
 }

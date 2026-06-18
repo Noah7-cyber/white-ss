@@ -37,21 +37,22 @@ export const SystemAdminInvitationSettings = () => {
       console.log("Failed to send invitation:", error);
       showToast({
         message: "Failed to send invitation",
-        description,
+        description: error?.message || "An unexpected error occurred",
         severity: "error",
       });
     }
   };
 
   return (
-    <Box className="max-w-2xl">
-      <Typography className="!text-xl !font-semibold mb-6">
-        Invite System Admin
-      </Typography>
-
-      <Typography className="!text-sm mb-4 text-gray-600">
-        Send an invitation email to add a new system administrator. They will have full access across all schools.
-      </Typography>
+    <Box className="rounded-lg bg-white flex flex-col gap-5 p-4 sm:p-5">
+      <Box className="flex flex-col gap-1">
+        <Typography className="!text-lg !font-semibold">
+          Invite System Admin
+        </Typography>
+        <Typography className="!text-sm text-gray-600">
+          Send an invitation email to add a new system administrator. They will have full access across all schools.
+        </Typography>
+      </Box>
 
       <Box className="flex flex-col gap-4">
         <Box className="flex gap-4">
@@ -61,6 +62,9 @@ export const SystemAdminInvitationSettings = () => {
               placeholder="Enter first name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
+              labelOnTop
+              labelClassName="!text-sm !font-medium !text-input-gray"
+              inputClasses="mt-1 !text-sm !h-10 !text-input-gray placeholder:!text-input-gray"
             />
           </Box>
           <Box className="flex-1">
@@ -69,27 +73,33 @@ export const SystemAdminInvitationSettings = () => {
               placeholder="Enter last name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
+              labelOnTop
+              labelClassName="!text-sm !font-medium !text-input-gray"
+              inputClasses="mt-1 !text-sm !h-10 !text-input-gray placeholder:!text-input-gray"
             />
           </Box>
         </Box>
-        <Box className="flex gap-4 items-end">
-          <Box className="flex-1">
-            <TextField
-              label="Email Address"
-              placeholder="Enter email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-            />
-          </Box>
-          <Button
-            onClick={handleInvite}
-            disabled={!email || !firstName || !lastName || isPending}
-            className="h-12 !px-8"
-          >
-            {isPending ? "Sending..." : "Send Invite"}
-          </Button>
+        <Box className="flex-1">
+          <TextField
+            label="Email Address"
+            placeholder="Enter email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            labelOnTop
+            labelClassName="!text-sm !font-medium !text-input-gray"
+            inputClasses="mt-1 !text-sm !h-10 !text-input-gray placeholder:!text-input-gray"
+          />
         </Box>
+      </Box>
+      <Box className="flex justify-end md:mt-0 mt-6">
+        <Button
+          onClick={handleInvite}
+          disabled={!email || !firstName || !lastName || isPending}
+          className="rounded-lg! w-full sm:!w-fit"
+        >
+          {isPending ? "Sending..." : "Send Invite"}
+        </Button>
       </Box>
     </Box>
   );

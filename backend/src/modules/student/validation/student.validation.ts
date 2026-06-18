@@ -83,7 +83,7 @@ export const createStudentValidation = [
   // EMERGENCY CONTACT
   // -------------------------
   body("emergencyContact")
-    .notEmpty().withMessage("Emergency contact is required")
+    .optional()
     .isObject().withMessage("Emergency contact must be an object"),
 
   body("emergencyContact.suffix")
@@ -94,15 +94,15 @@ export const createStudentValidation = [
 
 
   body("emergencyContact.contactName")
-    .notEmpty().withMessage("Contact name is required")
+    .optional()
     .isString().withMessage("Contact name must be a string"),
 
   body("emergencyContact.phone")
-    .notEmpty().withMessage("Phone number is required")
+    .optional()
     .isString().withMessage("Phone must be a valid string"),
 
   body("emergencyContact.relationship")
-    .notEmpty().withMessage("Relationship is required")
+    .optional()
     .isString().withMessage("Relationship must be a string"),
 
   body("emergencyContact.email")

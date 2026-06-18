@@ -13,6 +13,7 @@ export const FORM_QUESTION_TYPE = {
   CHECKBOX: "checkbox",
   IMAGE_UPLOAD: "image_upload",
   FILE_UPLOAD: "file_upload",
+  DATE: "date",
 } as const;
 
 export type FormQuestionTypeApi = (typeof FORM_QUESTION_TYPE)[keyof typeof FORM_QUESTION_TYPE];

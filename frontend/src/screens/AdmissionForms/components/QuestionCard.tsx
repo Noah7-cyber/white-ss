@@ -262,7 +262,7 @@ export function QuestionCard({
                   color: "#fff",
 
                   "& + .MuiSwitch-track": {
-                    backgroundColor: "#4F46E5",
+                    backgroundColor: "#008080",
                     opacity: 1,
                     border: 0,
                   },

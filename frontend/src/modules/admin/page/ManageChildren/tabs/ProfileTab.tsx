@@ -23,12 +23,13 @@ export default function ProfileTab({
   studentId?: string | number;
   /** When set, only the specified section renders (mobile flow). Undefined = show all (desktop). */
   mobileSection?: "general" | "medical" | "emergency";
+  hideEmergency?: boolean;
 }) {
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
   const showGeneral = !mobileSection || mobileSection === "general";
   const showMedical = !mobileSection || mobileSection === "medical";
-  const showEmergency = !mobileSection || mobileSection === "emergency";
+  const showEmergency = (!mobileSection || mobileSection === "emergency") && !hideEmergency;
 
   return (
     <Box className="flex flex-col !bg-white !px-4 md:!px-5 rounded-xl">
@@ -257,7 +258,6 @@ export default function ProfileTab({
                   control={control}
                   options={parentTitleOptions}
                   isForm
-                  requiredAsterisk
                   textFieldProps={{
                     label: "Title",
                     labelClassName: "!text-sm !font-medium !text-input-gray",
@@ -271,7 +271,6 @@ export default function ProfileTab({
                 />
               </Box>
               <CWTextField
-                requiredAsterisk
                 control={control}
                 name="emergencyInfo.firstName"
                 label="First Name"
@@ -282,7 +281,6 @@ export default function ProfileTab({
                 className="w-full"
               />
               <CWTextField
-                requiredAsterisk
                 control={control}
                 name="emergencyInfo.lastName"
                 label="Last Name"
@@ -299,7 +297,6 @@ export default function ProfileTab({
                 name="emergencyInfo.relationship"
                 options={relationshipOptions}
                 isForm
-                requiredAsterisk
                 textFieldProps={{
                   label: "Relationship",
                   labelClassName: "!text-sm !font-medium !text-input-gray",
@@ -311,7 +308,6 @@ export default function ProfileTab({
                 maxDialogWidth={80}
               />
               <CWTextField
-                requiredAsterisk
                 control={control}
                 name="emergencyInfo.phone"
                 label="Phone Number"
@@ -322,7 +318,6 @@ export default function ProfileTab({
                 className="w-full"
               />
               <CWTextField
-                requiredAsterisk
                 control={control}
                 name="emergencyInfo.email"
                 label="Email Address"
@@ -337,7 +332,6 @@ export default function ProfileTab({
 
             <Box className="flex flex-col gap-4">
               <CWTextField
-                requiredAsterisk
                 control={control}
                 name="emergencyInfo.address"
                 label=" Address"

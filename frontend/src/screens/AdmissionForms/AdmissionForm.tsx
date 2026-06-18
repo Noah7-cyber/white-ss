@@ -86,15 +86,9 @@ export function FormSubmissionsPage({
   const [formDescription, setFormDescription] = useState(initialFormDescription ?? "");
   const [questions, setQuestions] = useState<Question[]>(
     initialQuestions ?? [
-      { id: 1, type: "short", title: "Untitled Question", required: false },
-      { id: 2, type: "long", title: "Untitled Question", required: false },
-      {
-        id: 3,
-        type: "multiple",
-        title: "Untitled Question",
-        required: false,
-        options: ["Option 1"],
-      },
+      { id: 1, type: "short", title: "Question 1", required: false },
+      { id: 2, type: "short", title: "Question 2", required: false },
+      { id: 3, type: "short", title: "Question 3", required: false },
     ],
   );
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);

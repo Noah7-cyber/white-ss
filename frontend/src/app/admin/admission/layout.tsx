@@ -50,9 +50,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       route: "tours/create",
     },
     {
-      name: "Create Form",
+      name: "Create Custom Form",
       isActive: false,
       route: "forms",
+    },
+    {
+      name: "Create Admission Form",
+      isActive: false,
+      route: "forms?template=admission",
     },
   ];
   const handleRouteChange = (route: string) => {

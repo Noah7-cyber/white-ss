@@ -88,6 +88,7 @@ import { FormResponse } from "../../shared/entities/FormResponse";
 import { FormResponseItem } from "../../shared/entities/FormResponseItem";
 import { StudentReportDelivery } from "../../shared/entities/StudentReportDelivery";
 import { SystemAdminInvitation } from "../../systemAdmin/invitation/entities/SystemAdminInvitation";
+import { SystemAdminNotificationSetting } from "../../systemAdmin/settings/entities/SystemAdminNotificationSetting";
 
 // // Import missing entities if they exist
 // // If these don't exist, you'll need to create them or remove the references
@@ -209,6 +210,7 @@ export const AppDataSource = new DataSource({
     AnnouncementViews,
     Invitation,
     SystemAdminInvitation,
+    SystemAdminNotificationSetting,
 
     // ====== Financial/Billing =========
     Invoice,

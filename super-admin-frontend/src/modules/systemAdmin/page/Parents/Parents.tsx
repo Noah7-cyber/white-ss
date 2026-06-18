@@ -24,6 +24,7 @@ import {
   MobileChildrenCard,
   MobileChildrenCardSkeleton,
 } from "@/modules/shared/component/ChildrenPageComponent/MobileChildrenCard";
+import { SchoolFilter } from "@/components/SchoolFilter";
 
 export const Parents = () => {
   const router = useRouter();
@@ -57,6 +58,8 @@ export const Parents = () => {
     hasPermission,
     handleExport,
     isExporting,
+    filters,
+    applyFilters,
   } = useParents();
 
   const tableHeaders = ["Name", "Email", "Phone Number", "No. of Children", "Status", "Action"];
@@ -123,6 +126,10 @@ export const Parents = () => {
     <Box className="space-y-6 flex flex-col h-full p-5">
       <Box className="w-full md:flex hidden items-center justify-between">
         <Typography className="font-semibold! text-xl! text-text-primary!">Parents</Typography>
+        <SchoolFilter
+          value={filters?.schoolId}
+          onChange={(schoolId) => applyFilters({ ...filters, schoolId, pos: 0 })}
+        />
       </Box>
 
       <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto md:overflow-x-visible hide-scrollbar min-h-35 *:shrink-0 md:*:shrink">
@@ -200,24 +207,28 @@ export const Parents = () => {
             }}
             width={140}
           />
-          <button
-            onClick={handleOpenClassRoomFilter}
-            className="flex items-center justify-around px-2 h-10 w-36 text-gray-700 rounded-lg cursor-pointer border border-gray-200"
-          >
-            <span className="text-sm font-medium">{selectedClassRoomLabel}</span>
-            <ExpandMoreIcon className="" />
-          </button>
-          <FilterPopover
-            open={Boolean(classRoomAnchorEl)}
-            anchorEl={classRoomAnchorEl}
-            onClose={() => setClassRoomAnchorEl(null)}
-            options={classRoomOptions}
-            onSelect={(value) => {
-              setSelectedClassRoomFilter(value);
-            }}
-            onScrollEnd={fetchMoreClassRoom}
-            width={150}
-          />
+          {!!filters?.schoolId && (
+            <>
+              <button
+                onClick={handleOpenClassRoomFilter}
+                className="flex items-center justify-around px-2 h-10 w-36 text-gray-700 rounded-lg cursor-pointer border border-gray-200"
+              >
+                <span className="text-sm font-medium">{selectedClassRoomLabel}</span>
+                <ExpandMoreIcon className="" />
+              </button>
+              <FilterPopover
+                open={Boolean(classRoomAnchorEl)}
+                anchorEl={classRoomAnchorEl}
+                onClose={() => setClassRoomAnchorEl(null)}
+                options={classRoomOptions}
+                onSelect={(value) => {
+                  setSelectedClassRoomFilter(value);
+                }}
+                onScrollEnd={fetchMoreClassRoom}
+                width={150}
+              />
+            </>
+          )}
         </Box>
       </Box>
 

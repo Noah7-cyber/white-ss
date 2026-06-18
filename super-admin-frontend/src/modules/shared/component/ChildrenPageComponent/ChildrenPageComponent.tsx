@@ -25,6 +25,7 @@ import { useMediaQuery } from "@/utils/hooks/useMediaQuery";
 import FilterIcon from "@/modules/shared/assets/svgs/filter.svg";
 import { MobileChildrenCard, MobileChildrenCardSkeleton } from "./MobileChildrenCard";
 import { MobileFilterDrawer } from "@/modules/shared/component/MobileFilterDrawer/MobileFilterDrawer";
+import { SchoolFilter } from "@/components/SchoolFilter";
 
 interface ChildrenPageComponentProps {
   role: "admin" | "staff";
@@ -63,6 +64,8 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
     hasPermission,
     handleExport,
     isExporting,
+    filters,
+    applyFilters,
   } = useChildren(role);
 
   const router = useRouter();
@@ -142,15 +145,7 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
               Export
             </Button>
           )}
-          {role === "admin" && hasPermission("student", "create") && (
-            <Button
-              className="rounded-lg!"
-              onClick={() => router.push(`${DashboardRoutes.addChildren}`)}
-              startIcon={<AddIcon />}
-            >
-              Add Child
-            </Button>
-          )}
+
         </Box>
       </Box>
 
@@ -177,24 +172,34 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
         </div>
         {
           <Box className="gap-3 hidden lg:flex">
-            <button
-              onClick={handleOpenGradeFilter}
-              className="flex items-center justify-around px-3 h-10 text-gray-700 rounded-lg cursor-pointer border border-gray-200 bg-transparent"
-            >
-              <span className="text-sm font-medium">
-                {classroomFilters.find((f) => f.isActive)?.label || "All Classrooms"}
-              </span>
-              <ExpandMoreIcon className="ml-2" />
-            </button>
-            <FilterPopover
-              open={Boolean(gradeAnchorEl)}
-              anchorEl={gradeAnchorEl}
-              onClose={() => setGradeAnchorEl(null)}
-              options={classroomFilters}
-              onSelect={handleClassroomFilterChange}
-              onScrollEnd={fetchMoreClassrooms}
-              width={180}
-            />
+            {role === "admin" && (
+              <SchoolFilter
+                value={filters?.schoolId}
+                onChange={(schoolId) => applyFilters({ schoolId, pos: 0 })}
+              />
+            )}
+            {!!filters?.schoolId && (
+              <>
+                <button
+                  onClick={handleOpenGradeFilter}
+                  className="flex items-center justify-around px-3 h-10 text-gray-700 rounded-lg cursor-pointer border border-gray-200 bg-transparent"
+                >
+                  <span className="text-sm font-medium">
+                    {classroomFilters.find((f) => f.isActive)?.label || "All Classrooms"}
+                  </span>
+                  <ExpandMoreIcon className="ml-2" />
+                </button>
+                <FilterPopover
+                  open={Boolean(gradeAnchorEl)}
+                  anchorEl={gradeAnchorEl}
+                  onClose={() => setGradeAnchorEl(null)}
+                  options={classroomFilters}
+                  onSelect={handleClassroomFilterChange}
+                  onScrollEnd={fetchMoreClassrooms}
+                  width={180}
+                />
+              </>
+            )}
             {hasPermission("student", "view") && (
               <Button
                 className="rounded-lg! !bg-white !text-[#02273A] !border !border-gray-200"
@@ -211,15 +216,7 @@ export function ChildrenPageComponent({ role }: ChildrenPageComponentProps) {
                 Export
               </Button>
             )}
-            {role === "admin" && hasPermission("student", "create") && (
-              <Button
-                className="rounded-lg!"
-                onClick={() => router.push(`${DashboardRoutes.addChildren}`)}
-                startIcon={<AddIcon />}
-              >
-                Add Child
-              </Button>
-            )}
+
           </Box>
         }
       </Box>

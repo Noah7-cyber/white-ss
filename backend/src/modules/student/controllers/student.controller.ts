@@ -59,7 +59,7 @@ export class StudentController {
       return res.status(400).json({ success: false, message: "School ID is required" });
     }
 
-    const { generalInfo, medicalInfo, emergencyContact, parents, classroomId, schedule, documents } = req.body;
+    const { generalInfo, medicalInfo, emergencyContact, parents, classroomId, schedule, documents, formResponseId } = req.body;
 
     // Validate that schoolId from body matches user's schoolId
     try {
@@ -134,6 +134,7 @@ export class StudentController {
             schedule,
             photoUrl: generalInfo.photoUrl,
             enrolmentDate: generalInfo.enrolmentDate,
+            formResponseId: formResponseId,
           },
           { manager },
         );
@@ -499,7 +500,7 @@ export class StudentController {
       }
 
       const studentId = Number(req.params["id"]);
-      const { generalInfo, medicalInfo, emergencyContact, parents, classroomId, schedule, documents } = req.body;
+      const { generalInfo, medicalInfo, emergencyContact, parents, classroomId, schedule, documents, formResponseId } = req.body;
 
       // Validate school access - ensure student belongs to user's school
       const existingStudent = await studentService.getStudentById(studentId);
@@ -539,6 +540,7 @@ export class StudentController {
         if (schedule !== undefined) studentUpdatePayload.schedule = schedule;
         if (generalInfo?.photoUrl !== undefined) studentUpdatePayload.photoUrl = generalInfo.photoUrl;
         if (generalInfo?.enrolmentDate !== undefined) studentUpdatePayload.enrolmentDate = generalInfo.enrolmentDate;
+        if (formResponseId !== undefined) studentUpdatePayload.formResponseId = formResponseId;
         if (classroomId !== undefined) {
           // Validate classroom if provided
           if (classroomId) {

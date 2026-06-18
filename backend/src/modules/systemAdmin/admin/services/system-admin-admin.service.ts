@@ -26,7 +26,7 @@ export class SystemAdminAdminService {
         .leftJoinAndSelect("admin.user", "user")
         .leftJoinAndSelect("user.profile", "profile")
         .where("admin.deletedAt IS NULL")
-        .andWhere("admin.role = :role", { role: AdminRole.ADMIN });
+        .andWhere("admin.role IN (:...roles)", { roles: [AdminRole.ADMIN, AdminRole.SUPER_ADMIN] });
 
       if (filters.schoolId) {
         qb.andWhere("admin.schoolId = :schoolId", { schoolId: filters.schoolId });

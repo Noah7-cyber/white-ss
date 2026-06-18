@@ -13,6 +13,7 @@ import { classroomServices } from "@/services/classroom.service";
 import { scheduleTourServices, type SendOfferPayload } from "@/services/tour.service";
 import { uploadServices } from "@/services/upload.service";
 import { accountServices, GetDefaultBankAccountResponse } from "@/services/account.service";
+import { formDynamicEndpoints, type GetFormResponseByIdResponse } from "@/services/form.service";
 import type { Classroom } from "@/services/classroom.service";
 import type { DropdownOption } from "@/modules/shared/component/Dropdown";
 import type { LeadAndRequest } from "./useLeadsAndRequests";
@@ -47,33 +48,60 @@ export interface SendOfferItem {
   amount: number;
 }
 
+export interface ParentProps {
+  title: string;
+  firstName: string;
+  lastName: string;
+  relationship: string;
+  phone: string;
+  email: string;
+  address: string;
+}
+
 export interface SendOfferChild {
   id: string;
   firstName: string;
   lastName: string;
+  middleName: string;
   dateOfBirth: string;
+  dateOfEnrolment: string;
   classroom: number | string;
+  address: string;
+  schedule: string[];
+  allergies: string;
+  medications: string;
+  foodPreferences: string;
+  dietRestrictions: string;
+  notes: string;
+  emergencyTitle: string;
+  emergencyFirstName: string;
+  emergencyLastName: string;
+  emergencyRelationship: string;
+  emergencyPhone: string;
+  emergencyEmail: string;
+  emergencyAddress: string;
 }
 
 export interface SendOfferFormData {
-  parentFirstName: string;
-  parentLastName: string;
+  parents: ParentProps[];
   paymentMethod: string;
   children: SendOfferChild[];
   items: SendOfferItem[];
   notes: string;
+  emailTo: string;
+  emailSubject: string;
+  emailBody: string;
 }
 
-interface SendOfferFormValues {
-  parentFirstName: string;
-  parentLastName: string;
-  paymentMethod: string;
-  notes: string;
-}
+// SendOfferFormValues removed since SendOfferFormData is used
 
 const sendOfferSchema = yup.object().shape({
-  parentFirstName: yup.string().required("Parent first name is required"),
-  parentLastName: yup.string().required("Parent last name is required"),
+  parents: yup.array().of(
+    yup.object().shape({
+      firstName: yup.string().required("Parent first name is required"),
+      lastName: yup.string().required("Parent last name is required"),
+    })
+  ).min(1, "At least one parent is required"),
   paymentMethod: yup.string().required("Payment method is required"),
   children: yup
     .array()
@@ -98,30 +126,29 @@ const sendOfferSchema = yup.object().shape({
       yup.object().shape({
         description: yup.string().required("Description is required"),
         quantity: yup
-          .number()
-          .transform((_v, originalValue) => parseNumericFormValue(originalValue))
-          .typeError("Must be a number")
-          .moreThan(0, "Quantity must be greater than 0"),
+          .mixed()
+          .test("is-number", "Must be a number", (val) => !Number.isNaN(parseNumericFormValue(val)))
+          .test("greater-than-zero", "Quantity must be greater than 0", (val) => parseNumericFormValue(val) > 0),
         rate: yup
-          .number()
-          .transform((_v, originalValue) => parseNumericFormValue(originalValue))
-          .typeError("Must be a number")
-          .moreThan(0, "Rate must be greater than 0"),
+          .mixed()
+          .test("is-number", "Must be a number", (val) => !Number.isNaN(parseNumericFormValue(val)))
+          .test("greater-than-zero", "Rate must be greater than 0", (val) => parseNumericFormValue(val) > 0),
         vat: yup
-          .number()
-          .transform((_v, originalValue) => parseNumericFormValue(originalValue))
-          .typeError("Must be a number")
-          .min(0, "VAT cannot be less than 0%")
-          .max(100, "VAT cannot exceed 100%"),
+          .mixed()
+          .test("is-number", "Must be a number", (val) => !Number.isNaN(parseNumericFormValue(val)))
+          .test("min-vat", "VAT cannot be less than 0%", (val) => parseNumericFormValue(val) >= 0)
+          .test("max-vat", "VAT cannot exceed 100%", (val) => parseNumericFormValue(val) <= 100),
         amount: yup
-          .number()
-          .transform((_v, originalValue) => parseNumericFormValue(originalValue))
-          .typeError("Must be a number")
-          .min(0),
+          .mixed()
+          .test("is-number", "Must be a number", (val) => !Number.isNaN(parseNumericFormValue(val)))
+          .test("min-amount", "Amount cannot be less than 0", (val) => parseNumericFormValue(val) >= 0),
       }),
     )
     .min(1, "At least one item is required"),
   notes: yup.string().optional(),
+  emailTo: yup.string().email("Invalid email").required("Recipient email is required"),
+  emailSubject: yup.string().required("Subject is required"),
+  emailBody: yup.string().required("Message body is required"),
 });
 
 const defaultItem = (): SendOfferItem => ({
@@ -137,8 +164,24 @@ const defaultChild = (): SendOfferChild => ({
   id: crypto.randomUUID?.() ?? `child-${Date.now()}-${Math.random()}`,
   firstName: "",
   lastName: "",
+  middleName: "",
   dateOfBirth: "",
+  dateOfEnrolment: "",
   classroom: 0,
+  address: "",
+  schedule: [],
+  allergies: "",
+  medications: "",
+  foodPreferences: "",
+  dietRestrictions: "",
+  notes: "",
+  emergencyTitle: "",
+  emergencyFirstName: "",
+  emergencyLastName: "",
+  emergencyRelationship: "",
+  emergencyPhone: "",
+  emergencyEmail: "",
+  emergencyAddress: "",
 });
 
 export interface SendOfferAttachment {
@@ -225,24 +268,138 @@ export function useSendOffer(onSuccess?: () => void) {
 
   // Modal & Lead state
   const [showSendOfferModal, setShowSendOfferModal] = useState(false);
-  const [showSendOfferEmailModal, setShowSendOfferEmailModal] = useState(false);
   const [sendOfferLead, setSendOfferLead] = useState<LeadAndRequest | null>(null);
-  const [emailData, setEmailData] = useState<SendOfferEmailData | null>(null);
+  const [emailAttachments, setEmailAttachments] = useState<SendOfferAttachment[]>([]);
 
-  // Derived Names
+  // Fetch full form response details if needed
+  const { data: formResponseData } = useQueryService<
+    Record<string, never>,
+    GetFormResponseByIdResponse
+  >({
+    service: formDynamicEndpoints.getFormResponseById(
+      sendOfferLead?.recordType === "form_response" ? sendOfferLead.bookingId : 0,
+    ),
+    options: {
+      enabled: sendOfferLead?.recordType === "form_response" && !!sendOfferLead.bookingId && showSendOfferModal,
+    },
+  });
+
+  // Derived Names and Form Prefill
   const derivedData = useMemo(() => {
-    const firstParentName = sendOfferLead?.parents?.split(",")[0]?.trim() || "";
-    const location = sendOfferLead?.booking?.tourEvent?.location || "";
-    const titles = ["mr", "mrs", "ms", "miss", "dr", "prof"];
-    const nameParts = firstParentName
-      .split(/\s+/)
-      .filter((part) => !titles.includes(part.toLowerCase().replace(".", "")));
+    let parents: ParentProps[] = [{
+      title: "",
+      firstName: "",
+      lastName: "",
+      relationship: "",
+      phone: "",
+      email: "",
+      address: "",
+    }];
+    let location = "";
+    
+    // Child info
+    let childFirstName = "";
+    let childLastName = "";
+    let childMiddleName = "";
+    let childDob = "";
+    let childEnrolment = "";
+    let childAddress = "";
+    let childAllergies = "";
+    let childMedications = "";
+    let childFoodPref = "";
+    let childDiet = "";
+    let childNotes = "";
+    
+    // Emergency info
+    let emergencyTitle = "";
+    let emergencyFirstName = "";
+    let emergencyLastName = "";
+    let emergencyRelationship = "";
+    let emergencyPhone = "";
+    let emergencyEmail = "";
+    let emergencyAddress = "";
+    
+    // Documents
+    let birthCertificate = "";
+    let immunizationRecord = "";
 
-    const firstName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0] || "";
-    const lastName = nameParts.length > 1 ? nameParts[0] : "";
+    if (sendOfferLead?.recordType === "form_response" && formResponseData?.response?.formResponseItems) {
+      const responses = formResponseData.response.formResponseItems;
+      const findResponse = (keyword: string) => {
+        const item = responses.find((r: any) => r.formItem?.title?.toLowerCase().includes(keyword));
+        return item?.selectedOption?.label || item?.value || "";
+      };
 
-    return { firstName, lastName, location };
-  }, [sendOfferLead]);
+      parents[0] = {
+        title: findResponse("parent title"),
+        firstName: findResponse("parent first name"),
+        lastName: findResponse("parent last name"),
+        relationship: findResponse("parent relationship"),
+        phone: findResponse("parent phone"),
+        email: findResponse("parent email"),
+        address: findResponse("parent address"),
+      };
+
+      childFirstName = findResponse("child first name");
+      childLastName = findResponse("child last name");
+      childMiddleName = findResponse("child middle name");
+      childAddress = findResponse("child address");
+      childAllergies = findResponse("allergies");
+      childMedications = findResponse("medications");
+      childFoodPref = findResponse("food preferences");
+      childDiet = findResponse("diet restrictions");
+      childNotes = findResponse("medical notes");
+      
+      emergencyTitle = findResponse("emergency contact title");
+      emergencyFirstName = findResponse("emergency contact first name");
+      emergencyLastName = findResponse("emergency contact last name");
+      emergencyRelationship = findResponse("emergency contact relationship");
+      emergencyPhone = findResponse("emergency contact phone");
+      emergencyEmail = findResponse("emergency contact email");
+      emergencyAddress = findResponse("emergency contact address");
+      
+      birthCertificate = findResponse("birth certificate");
+      immunizationRecord = findResponse("immunization record");
+
+      const dobRes = findResponse("date of birth");
+      if (dobRes) {
+         if (dobRes.includes("-")) {
+            const parts = dobRes.split("-");
+            childDob = (parts.length === 3 && parts[0].length === 4) ? `${parts[2]}/${parts[1]}/${parts[0]}` : dobRes;
+         } else {
+            childDob = dobRes;
+         }
+      }
+
+      const enrolRes = findResponse("date of enrolment");
+      if (enrolRes) {
+         if (enrolRes.includes("-")) {
+            const parts = enrolRes.split("-");
+            childEnrolment = (parts.length === 3 && parts[0].length === 4) ? `${parts[2]}/${parts[1]}/${parts[0]}` : enrolRes;
+         } else {
+            childEnrolment = enrolRes;
+         }
+      }
+
+    } else {
+      const firstParentName = sendOfferLead?.parents?.split(",")[0]?.trim() || "";
+      location = sendOfferLead?.booking?.tourEvent?.location || "";
+      const titles = ["mr", "mrs", "ms", "miss", "dr", "prof"];
+      const nameParts = firstParentName
+        .split(/\s+/)
+        .filter((part) => !titles.includes(part.toLowerCase().replace(".", "")));
+
+      parents[0].firstName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0] || "";
+      parents[0].lastName = nameParts.length > 1 ? nameParts[0] : "";
+    }
+
+    return { 
+      parents, location, childFirstName, childLastName, childMiddleName, childDob, childEnrolment, childAddress,
+      childAllergies, childMedications, childFoodPref, childDiet, childNotes,
+      emergencyTitle, emergencyFirstName, emergencyLastName, emergencyRelationship, emergencyPhone, emergencyEmail, emergencyAddress,
+      birthCertificate, immunizationRecord
+    };
+  }, [sendOfferLead, formResponseData]);
 
   // Form logic
   const {
@@ -252,16 +409,27 @@ export function useSendOffer(onSuccess?: () => void) {
     handleSubmit,
     setValue,
     watch,
+    trigger,
     formState: { errors },
   } = useFormValidator<SendOfferFormData>({
-    validationSchema: sendOfferSchema,
+    validationSchema: sendOfferSchema as any,
     defaultValues: {
-      parentFirstName: "",
-      parentLastName: "",
+      parents: [{
+        title: "",
+        firstName: "",
+        lastName: "",
+        relationship: "",
+        phone: "",
+        email: "",
+        address: ""
+      }],
       paymentMethod: "transfer",
       children: [defaultChild()],
       items: [defaultItem()],
       notes: "",
+      emailTo: "",
+      emailSubject: "",
+      emailBody: "",
     },
   });
 
@@ -289,22 +457,15 @@ export function useSendOffer(onSuccess?: () => void) {
   const openSendOfferModal = useCallback((lead: LeadAndRequest) => {
     setSendOfferLead(lead);
     setShowSendOfferModal(true);
+    setEmailAttachments([]);
   }, []);
 
   const closeSendOfferModal = useCallback(() => {
     setShowSendOfferModal(false);
-    // Don't null lead yet as Email modal might need it
-  }, []);
-
-  const openSendOfferEmailModal = useCallback((data: SendOfferEmailData) => {
-    setEmailData(data);
-    setShowSendOfferEmailModal(true);
-  }, []);
-
-  const closeSendOfferEmailModal = useCallback(() => {
-    setShowSendOfferEmailModal(false);
-    setEmailData(null);
-    setSendOfferLead(null);
+    setTimeout(() => {
+      setSendOfferLead(null);
+      setEmailAttachments([]);
+    }, 300);
   }, []);
 
   const addAttachment = useCallback(
@@ -321,13 +482,10 @@ export function useSendOffer(onSuccess?: () => void) {
         const uploadedUrl = response?.files?.[0]?.url;
 
         if (uploadedUrl) {
-          setEmailData((prev) => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              attachments: [...prev.attachments, { name: file.name, url: uploadedUrl }],
-            };
-          });
+          setEmailAttachments((prev) => [
+            ...prev,
+            { name: file.name, url: uploadedUrl },
+          ]);
         }
       } catch (error: any) {
         showToast({
@@ -341,14 +499,10 @@ export function useSendOffer(onSuccess?: () => void) {
   );
 
   const removeAttachment = useCallback((index: number) => {
-    setEmailData((prev) => {
-      if (!prev) return null;
-      const newAttachments = [...prev.attachments];
+    setEmailAttachments((prev) => {
+      const newAttachments = [...prev];
       newAttachments.splice(index, 1);
-      return {
-        ...prev,
-        attachments: newAttachments,
-      };
+      return newAttachments;
     });
   }, []);
 
@@ -356,12 +510,34 @@ export function useSendOffer(onSuccess?: () => void) {
   useEffect(() => {
     if (showSendOfferModal) {
       reset({
-        parentFirstName: derivedData.firstName,
-        parentLastName: derivedData.lastName,
+        parents: derivedData.parents,
         paymentMethod: "transfer",
         notes: "",
-        children: [defaultChild()],
+        children: [{
+           ...defaultChild(),
+           firstName: derivedData.childFirstName,
+           lastName: derivedData.childLastName,
+           middleName: derivedData.childMiddleName,
+           dateOfBirth: derivedData.childDob,
+           dateOfEnrolment: derivedData.childEnrolment,
+           address: derivedData.childAddress,
+           allergies: derivedData.childAllergies,
+           medications: derivedData.childMedications,
+           foodPreferences: derivedData.childFoodPref,
+           dietRestrictions: derivedData.childDiet,
+           notes: derivedData.childNotes,
+           emergencyTitle: derivedData.emergencyTitle,
+           emergencyFirstName: derivedData.emergencyFirstName,
+           emergencyLastName: derivedData.emergencyLastName,
+           emergencyRelationship: derivedData.emergencyRelationship,
+           emergencyPhone: derivedData.emergencyPhone,
+           emergencyEmail: derivedData.emergencyEmail,
+           emergencyAddress: derivedData.emergencyAddress,
+        }],
         items: [defaultItem()],
+        emailTo: "",
+        emailSubject: "",
+        emailBody: "",
       });
     }
   }, [showSendOfferModal, derivedData, reset]);
@@ -421,32 +597,27 @@ export function useSendOffer(onSuccess?: () => void) {
     [getValues, setValue],
   );
 
-  const handleGenerate = useCallback(
-    (formValues: SendOfferFormData) => {
-      const parentEmail = sendOfferLead?.booking?.email || "";
-      const childFullName =
-        formValues.children.length > 0
-          ? `${formValues.children[0].firstName} ${formValues.children[0].lastName}`.trim()
-          : "Noah Johnson";
+  const generateEmailContent = useCallback(() => {
+    const formValues = getValues();
+    const parentEmail = sendOfferLead?.booking?.email || (sendOfferLead as any)?.email || "";
+    
+    // We can assume at least one child is present if validation passed for step 1 & 2
+    const childFullName =
+      formValues.children && formValues.children.length > 0
+        ? `${formValues.children[0].firstName} ${formValues.children[0].lastName}`.trim()
+        : "Noah Johnson";
 
-      const location = derivedData.location.trim();
+    const location = derivedData.location.trim();
 
-      setEmailData({
-        to: parentEmail,
-        subject: location
-          ? `Admission Offer from ${location} - ${childFullName}`
-          : `Admission offer - ${childFullName}`,
-        body: `Dear Sir/Madam,\n\nPlease find attached the admission offer and invoice for ${childFullName}${location ? ` from ${location}` : ""} for your review and necessary action.\n\nThank you.\n\nKind regards,\nFinance Team${location ? `\n${location}` : ""}`,
-        attachments: [],
-      });
+    setValue("emailTo", parentEmail);
+    setValue("emailSubject", location
+      ? `Admission Offer from ${location} - ${childFullName}`
+      : `Admission offer - ${childFullName}`
+    );
+    setValue("emailBody", `Dear Sir/Madam,\n\nPlease find attached the admission offer and invoice for ${childFullName}${location ? ` from ${location}` : ""} for your review and necessary action.\n\nThank you.\n\nKind regards,\nFinance Team${location ? `\n${location}` : ""}`);
+  }, [sendOfferLead, derivedData, getValues, setValue]);
 
-      setShowSendOfferModal(false);
-      setShowSendOfferEmailModal(true);
-    },
-    [sendOfferLead, derivedData],
-  );
-
-  const onInvalidGenerate = useCallback((validationErrors: FieldErrors<SendOfferFormData>) => {
+  const onInvalidSubmit = useCallback((validationErrors: FieldErrors<SendOfferFormData>) => {
     const msg =
       extractFirstErrorMessage(validationErrors) ??
       "Fill in all required fields before generating the email.";
@@ -458,33 +629,52 @@ export function useSendOffer(onSuccess?: () => void) {
     });
   }, []);
 
-  const submitGenerateOffer = useCallback(
-    (e?: React.BaseSyntheticEvent) => handleSubmit(handleGenerate, onInvalidGenerate)(e),
-    [handleSubmit, handleGenerate, onInvalidGenerate],
-  );
-
   const handleSendFinalOffer = useCallback(
-    async (finalEmailData: any) => {
+    async (formValues: SendOfferFormData) => {
       if (!sendOfferLead?.bookingId) {
         console.error("No booking ID found");
         return;
       }
 
-      const formValues = getValues();
       const bankAccountId = defaultBankResp?.bankAccount?.id;
 
       const basePayload = {
         parent: {
-          firstName: formValues.parentFirstName,
-          lastName: formValues.parentLastName,
+          title: formValues.parents?.[0]?.title,
+          firstName: formValues.parents?.[0]?.firstName || "",
+          lastName: formValues.parents?.[0]?.lastName || "",
+          relationship: formValues.parents?.[0]?.relationship,
+          phone: formValues.parents?.[0]?.phone,
+          email: formValues.parents?.[0]?.email,
+          address: formValues.parents?.[0]?.address,
         },
         students: formValues.children.map((child) => ({
           firstName: child.firstName,
           lastName: child.lastName,
+          middleName: child.middleName,
           classroomId: child.classroom,
           dateOfBirth: child.dateOfBirth
             ? dayjs(child.dateOfBirth, "DD/MM/YYYY").format("YYYY-MM-DD")
             : "",
+          dateOfEnrolment: child.dateOfEnrolment,
+          address: child.address,
+          schedule: child.schedule,
+          allergies: child.allergies,
+          medications: child.medications,
+          foodPreferences: child.foodPreferences,
+          dietRestrictions: child.dietRestrictions,
+          notes: child.notes,
+          emergencyTitle: child.emergencyTitle,
+          emergencyFirstName: child.emergencyFirstName,
+          emergencyLastName: child.emergencyLastName,
+          emergencyRelationship: child.emergencyRelationship,
+          emergencyPhone: child.emergencyPhone,
+          emergencyEmail: child.emergencyEmail,
+          emergencyAddress: child.emergencyAddress,
+          documents: [
+            ...(derivedData.childBirthCert ? [{ type: "Birth Certificate", url: derivedData.childBirthCert, originalName: "birth_certificate" }] : []),
+            ...(derivedData.childImmunization ? [{ type: "Immunization Record", url: derivedData.childImmunization, originalName: "immunization_record" }] : []),
+          ],
         })),
         items: formValues.items.map((item) => ({
           description: item.description,
@@ -496,10 +686,10 @@ export function useSendOffer(onSuccess?: () => void) {
         paymentMethod: formValues.paymentMethod,
         ...(bankAccountId ? { bankAccountId } : {}),
         email: {
-          receipient: finalEmailData.to,
-          subject: finalEmailData.subject,
-          body: finalEmailData.body,
-          attachment: finalEmailData.attachments?.map((a: SendOfferAttachment) => a.url) || [],
+          receipient: formValues.emailTo,
+          subject: formValues.emailSubject,
+          body: formValues.emailBody,
+          attachment: emailAttachments.map((a) => a.url),
         },
       };
 
@@ -511,26 +701,35 @@ export function useSendOffer(onSuccess?: () => void) {
       try {
         await sendOffer(payload);
         onSuccess?.();
-        closeSendOfferEmailModal();
-        setSendOfferLead(null);
+        closeSendOfferModal();
+        showToast({
+          message: "Offer Sent",
+          description: "The admission offer has been sent successfully.",
+          severity: "success",
+        });
       } catch (error) {
         console.error("Failed to send offer:", error);
       }
     },
-    [sendOfferLead, getValues, sendOffer, onSuccess, closeSendOfferEmailModal, defaultBankResp?.bankAccount?.id],
+    [sendOfferLead, sendOffer, onSuccess, closeSendOfferModal, defaultBankResp?.bankAccount?.id, emailAttachments],
+  );
+
+  const submitSendOffer = useCallback(
+    (e?: React.BaseSyntheticEvent) => handleSubmit(handleSendFinalOffer, onInvalidSubmit)(e),
+    [handleSubmit, handleSendFinalOffer, onInvalidSubmit],
   );
 
   return {
     classroomOptions,
     isLoadingClassrooms,
     showSendOfferModal,
-    showSendOfferEmailModal,
     openSendOfferModal,
     closeSendOfferModal,
-    closeSendOfferEmailModal,
-    emailData,
+    emailAttachments,
     addAttachment,
     removeAttachment,
+    generateEmailContent,
+    derivedData,
     // Form & Items
     control,
     items,
@@ -542,9 +741,9 @@ export function useSendOffer(onSuccess?: () => void) {
     addChild,
     removeChild,
     updateChild,
-    submitGenerateOffer,
+    submitSendOffer,
     errors,
-    handleSendFinalOffer,
+    trigger,
     isSendingOffer,
     isUploadingDocuments,
   };
